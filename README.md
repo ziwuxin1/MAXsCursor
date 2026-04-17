@@ -1,10 +1,12 @@
+<p align="center">
+  <img src="assets/cursor.png" alt="MAXsCursor icon" width="96"/>
+</p>
+
 # MAXsCursor
 
 Low-latency cursor highlight and keyboard shortcut overlay for Windows. Built for recording teaching videos at high refresh rates (144 Hz / 240 Hz / 260 Hz) in GPU-heavy applications like UE5, Maya, Substance Designer, and Blender.
 
 .NET 10 + WPF + pure Win32 layered window. No third-party UI frameworks, no telemetry, no network calls.
-
-![icon](assets/cursor.png)
 
 ## Features
 
