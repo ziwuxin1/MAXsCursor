@@ -1,0 +1,26 @@
+# Build output
+bin/
+obj/
+artifacts/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+*.pdb
+
+# IDE / editor
+.vs/
+.idea/
+*.user
+*.suo
+*.swp
+*.orig
+TestResults/
+
+# Logs
+*.log
+
+# Published exe at repo root (produced by `dotnet publish` + copy step; recreated on demand)
+/MAXsCursor.exe
