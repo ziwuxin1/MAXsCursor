@@ -1,9 +1,12 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using MAXsCursor.Core;
 using MAXsCursor.Interop;
 using MediaColor = System.Windows.Media.Color;
 using MediaBrush = System.Windows.Media.SolidColorBrush;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 namespace MAXsCursor.Settings;
 
@@ -35,6 +38,10 @@ internal partial class SettingsWindow : Window
         HudEnabledCheck.Unchecked += (_, _) => OnHudEnabledChanged();
         MouseButtonsCheck.Checked += (_, _) => OnMouseButtonsChanged();
         MouseButtonsCheck.Unchecked += (_, _) => OnMouseButtonsChanged();
+
+        // PreviewKeyDown so capture fires before any TextBox or ComboBox can eat the event.
+        PreviewKeyDown += OnCaptureKey;
+        Closed += (_, _) => EndCapture(commit: false);
     }
 
     private void LoadFromModel()
@@ -88,6 +95,15 @@ internal partial class SettingsWindow : Window
         MouseButtonsCheck.Content = Strings.ShowMouseButtons;
         HudFontSizeText.Text = Strings.KeyFontSize;
         AdjustPositionButton.Content = Strings.AdjustPosition;
+        SectionShortcutsText.Text = Strings.SectionShortcuts;
+        ShortcutToggleLabelText.Text = Strings.ShortcutToggleLabel;
+        ShortcutToggleHintText.Text = Strings.ShortcutToggleHint;
+        ShortcutZoomLabelText.Text = Strings.ShortcutZoomLabel;
+        ShortcutZoomHintText.Text = Strings.ShortcutZoomHint;
+        ToggleHotkeyButton.Content = KeyTranslator.FormatHotkey(_model.ToggleHotkeyMods, _model.ToggleHotkeyVk);
+        ZoomHotkeyButton.Content = KeyTranslator.FormatHotkey(_model.ZoomHotkeyMods, _model.ZoomHotkeyVk);
+        HelpHeaderText.Text = Strings.HelpHeader;
+        HelpBodyText.Text = Strings.HelpBody;
         ResetButton.Content = Strings.Reset;
         OkButton.Content = Strings.Ok;
         CancelButton.Content = Strings.Cancel;
@@ -228,6 +244,90 @@ internal partial class SettingsWindow : Window
         return (cx, cy);
     }
 
+    // --- Hotkey capture ---
+
+    private enum HotkeyTarget { None, Toggle, Zoom }
+    private HotkeyTarget _captureTarget = HotkeyTarget.None;
+
+    private void BeginCaptureToggle_Click(object sender, RoutedEventArgs e) => BeginCapture(HotkeyTarget.Toggle);
+    private void BeginCaptureZoom_Click(object sender, RoutedEventArgs e) => BeginCapture(HotkeyTarget.Zoom);
+
+    private void BeginCapture(HotkeyTarget target)
+    {
+        _captureTarget = target;
+        (target == HotkeyTarget.Toggle ? ToggleHotkeyButton : ZoomHotkeyButton).Content = Strings.ShortcutCapturePrompt;
+        if (System.Windows.Application.Current is App app) app.SetHotkeyCapture(true);
+        Keyboard.Focus(this);
+    }
+
+    private void EndCapture(bool commit, uint mods = 0, uint vk = 0)
+    {
+        var target = _captureTarget;
+        _captureTarget = HotkeyTarget.None;
+        if (System.Windows.Application.Current is App app) app.SetHotkeyCapture(false);
+
+        if (commit && target != HotkeyTarget.None)
+        {
+            if (target == HotkeyTarget.Toggle)
+            {
+                _model.ToggleHotkeyMods = mods;
+                _model.ToggleHotkeyVk = vk;
+            }
+            else
+            {
+                _model.ZoomHotkeyMods = mods;
+                _model.ZoomHotkeyVk = vk;
+            }
+            _onChanged(_model);
+        }
+
+        // Restore labels (either to the committed new value or back to what was there).
+        ToggleHotkeyButton.Content = KeyTranslator.FormatHotkey(_model.ToggleHotkeyMods, _model.ToggleHotkeyVk);
+        ZoomHotkeyButton.Content = KeyTranslator.FormatHotkey(_model.ZoomHotkeyMods, _model.ZoomHotkeyVk);
+    }
+
+    private void OnCaptureKey(object sender, KeyEventArgs e)
+    {
+        if (_captureTarget == HotkeyTarget.None) return;
+
+        // Alt combos come in via e.SystemKey when e.Key == System.
+        var raw = e.Key == Key.System ? e.SystemKey : e.Key;
+
+        if (raw == Key.Escape)
+        {
+            EndCapture(commit: false);
+            e.Handled = true;
+            return;
+        }
+
+        // Reject lone modifier keys; we need a real key to bind.
+        if (raw is Key.LeftCtrl or Key.RightCtrl or Key.LeftShift or Key.RightShift
+            or Key.LeftAlt or Key.RightAlt or Key.LWin or Key.RWin or Key.System)
+        {
+            return;
+        }
+
+        uint mods = 0;
+        var km = Keyboard.Modifiers;
+        if ((km & ModifierKeys.Control) != 0) mods |= WindowStyles.MOD_CONTROL;
+        if ((km & ModifierKeys.Shift) != 0) mods |= WindowStyles.MOD_SHIFT;
+        if ((km & ModifierKeys.Alt) != 0) mods |= WindowStyles.MOD_ALT;
+        if ((km & ModifierKeys.Windows) != 0) mods |= WindowStyles.MOD_WIN;
+
+        if (mods == 0)
+        {
+            // Tell the user they need a modifier; keep capture open.
+            var btn = _captureTarget == HotkeyTarget.Toggle ? ToggleHotkeyButton : ZoomHotkeyButton;
+            btn.Content = Strings.ShortcutNeedsMod;
+            e.Handled = true;
+            return;
+        }
+
+        var vk = (uint)KeyInterop.VirtualKeyFromKey(raw);
+        EndCapture(commit: true, mods, vk);
+        e.Handled = true;
+    }
+
     private void Ok_Click(object sender, RoutedEventArgs e) => Close();
 
     private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -249,8 +349,13 @@ internal partial class SettingsWindow : Window
         _model.HudCustomPosition = defaults.HudCustomPosition;
         _model.HudX = defaults.HudX;
         _model.HudY = defaults.HudY;
+        _model.ToggleHotkeyMods = defaults.ToggleHotkeyMods;
+        _model.ToggleHotkeyVk = defaults.ToggleHotkeyVk;
+        _model.ZoomHotkeyMods = defaults.ZoomHotkeyMods;
+        _model.ZoomHotkeyVk = defaults.ZoomHotkeyVk;
         // keep language — user's display preference survives a settings reset
         LoadFromModel();
+        ApplyStrings();
         _onChanged(_model);
     }
 

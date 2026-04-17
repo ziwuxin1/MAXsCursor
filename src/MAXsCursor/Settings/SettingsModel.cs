@@ -26,6 +26,13 @@ internal sealed class SettingsModel
     public int HudX { get; set; } = 0;
     public int HudY { get; set; } = 0;
 
+    // Global hotkeys. Modifiers encoded as MOD_ALT=1, MOD_CONTROL=2, MOD_SHIFT=4, MOD_WIN=8.
+    // Vk is the raw Win32 virtual-key code (e.g. VK_F5 = 0x74 = 116, VK_2 = 0x32 = 50).
+    public uint ToggleHotkeyMods { get; set; } = 0x0001;   // Alt
+    public uint ToggleHotkeyVk { get; set; } = 0x74;       // F5
+    public uint ZoomHotkeyMods { get; set; } = 0x0002;     // Ctrl
+    public uint ZoomHotkeyVk { get; set; } = 0x32;         // 2
+
     // UI language. "zh" or "en". Default "zh" since the primary user is Chinese-speaking.
     public string Language { get; set; } = "zh";
 
@@ -43,6 +50,10 @@ internal sealed class SettingsModel
         HudCustomPosition = HudCustomPosition,
         HudX = HudX,
         HudY = HudY,
+        ToggleHotkeyMods = ToggleHotkeyMods,
+        ToggleHotkeyVk = ToggleHotkeyVk,
+        ZoomHotkeyMods = ZoomHotkeyMods,
+        ZoomHotkeyVk = ZoomHotkeyVk,
         Language = Language
     };
 }

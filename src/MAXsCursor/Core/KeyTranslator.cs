@@ -68,6 +68,20 @@ internal static class KeyTranslator
         return sb.ToString();
     }
 
+    // Format a (mods, vk) pair for display in a hotkey button. Works with both
+    // RegisterHotKey mod flags (MOD_ALT=1, MOD_CONTROL=2, MOD_SHIFT=4, MOD_WIN=8)
+    // and Win32 virtual-key codes.
+    public static string FormatHotkey(uint mods, uint vk)
+    {
+        var sb = new StringBuilder(24);
+        if ((mods & Interop.WindowStyles.MOD_CONTROL) != 0) sb.Append("Ctrl+");
+        if ((mods & Interop.WindowStyles.MOD_SHIFT) != 0) sb.Append("Shift+");
+        if ((mods & Interop.WindowStyles.MOD_ALT) != 0) sb.Append("Alt+");
+        if ((mods & Interop.WindowStyles.MOD_WIN) != 0) sb.Append("Win+");
+        sb.Append(VkToText(vk) ?? $"VK_{vk:X2}");
+        return sb.ToString();
+    }
+
     public static bool IsBareModifierKey(uint vk) => vk switch
     {
         Win32.VK_SHIFT or Win32.VK_LSHIFT or Win32.VK_RSHIFT => true,

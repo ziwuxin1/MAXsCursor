@@ -3,20 +3,20 @@ using MAXsCursor.Interop;
 
 namespace MAXsCursor.Core;
 
+// Host a message-only HwndSource on the UI thread, register any number of global
+// hotkeys on it via RegisterHotKey, and dispatch each WM_HOTKEY to its callback
+// using the hotkey id as the lookup key.
 internal sealed class HotkeyManager : IDisposable
 {
-    private const int HotkeyId = 0x5A01;
     private static readonly nint HWND_MESSAGE = new(-3);
 
     private readonly HwndSource _source;
-    private readonly Action _onPressed;
-    private bool _registered;
+    private readonly Dictionary<int, Action> _handlers = new();
+    private int _nextId = 0x5A00;
     private bool _disposed;
 
-    public HotkeyManager(Action onPressed)
+    public HotkeyManager()
     {
-        _onPressed = onPressed;
-
         var parameters = new HwndSourceParameters("MAXsCursor.HotkeySink")
         {
             ParentWindow = HWND_MESSAGE,
@@ -30,25 +30,37 @@ internal sealed class HotkeyManager : IDisposable
         _source.AddHook(WndProc);
     }
 
-    public bool Register()
+    public int? Register(uint modifiers, uint vkCode, Action onPressed)
     {
-        if (_registered) return true;
-
-        _registered = Win32.RegisterHotKey(
+        var id = _nextId++;
+        var ok = Win32.RegisterHotKey(
             _source.Handle,
-            HotkeyId,
-            WindowStyles.MOD_ALT | WindowStyles.MOD_NOREPEAT,
-            (uint)WindowStyles.VK_F5);
+            id,
+            modifiers | WindowStyles.MOD_NOREPEAT,
+            vkCode);
+        if (!ok) return null;
+        _handlers[id] = onPressed;
+        return id;
+    }
 
-        return _registered;
+    public void Unregister(int id)
+    {
+        if (_handlers.Remove(id))
+        {
+            Win32.UnregisterHotKey(_source.Handle, id);
+        }
     }
 
     private nint WndProc(nint hwnd, int msg, nint wParam, nint lParam, ref bool handled)
     {
-        if (msg == WindowStyles.WM_HOTKEY && wParam.ToInt32() == HotkeyId)
+        if (msg == WindowStyles.WM_HOTKEY)
         {
-            _onPressed();
-            handled = true;
+            var id = wParam.ToInt32();
+            if (_handlers.TryGetValue(id, out var handler))
+            {
+                handler();
+                handled = true;
+            }
         }
         return nint.Zero;
     }
@@ -58,11 +70,11 @@ internal sealed class HotkeyManager : IDisposable
         if (_disposed) return;
         _disposed = true;
 
-        if (_registered)
+        foreach (var id in _handlers.Keys)
         {
-            Win32.UnregisterHotKey(_source.Handle, HotkeyId);
-            _registered = false;
+            Win32.UnregisterHotKey(_source.Handle, id);
         }
+        _handlers.Clear();
 
         _source.RemoveHook(WndProc);
         _source.Dispose();

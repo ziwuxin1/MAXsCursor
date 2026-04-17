@@ -4,6 +4,7 @@ using MAXsCursor.Interop;
 using MAXsCursor.Overlay;
 using MAXsCursor.Settings;
 using MAXsCursor.Tray;
+using MAXsCursor.Zoom;
 using Application = System.Windows.Application;
 using StartupEventArgs = System.Windows.StartupEventArgs;
 using ExitEventArgs = System.Windows.ExitEventArgs;
@@ -19,8 +20,13 @@ public partial class App : Application
     private RenderClock? _clock;
     private EventBus? _bus;
     private SettingsWindow? _settingsWindow;
+    private ZoomWindow? _zoomWindow;
     private SettingsModel _settings = SettingsModel.Defaults();
     private bool _enabled = true;
+
+    private int? _toggleHotkeyId;
+    private int? _zoomHotkeyId;
+    private bool _hotkeyCaptureActive;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -60,11 +66,8 @@ public partial class App : Application
         _clock = new RenderClock(OnFrameTick);
         _clock.Start();
 
-        _hotkey = new HotkeyManager(ToggleEnabled);
-        if (!_hotkey.Register())
-        {
-            Log("WARN: Alt+F5 hotkey registration failed.");
-        }
+        _hotkey = new HotkeyManager();
+        RegisterConfiguredHotkeys();
 
         _tray = new TrayIcon(onToggle: ToggleEnabled, onSettings: ShowSettings, onQuit: ShutdownCleanly);
         _tray.SetEnabled(_enabled);
@@ -176,12 +179,21 @@ public partial class App : Application
     private void OnSettingsChanged(SettingsModel updated)
     {
         var languageChanged = !string.Equals(_settings.Language, updated.Language, StringComparison.OrdinalIgnoreCase);
+        var toggleChanged = _settings.ToggleHotkeyMods != updated.ToggleHotkeyMods
+                         || _settings.ToggleHotkeyVk != updated.ToggleHotkeyVk;
+        var zoomChanged = _settings.ZoomHotkeyMods != updated.ZoomHotkeyMods
+                       || _settings.ZoomHotkeyVk != updated.ZoomHotkeyVk;
         _settings = updated.Clone();
 
         if (languageChanged)
         {
             Strings.SetLanguage(_settings.Language);
             _tray?.UpdateLanguage();
+        }
+
+        if (toggleChanged || zoomChanged)
+        {
+            RegisterConfiguredHotkeys();
         }
 
         ApplyCursorSettings();
@@ -203,6 +215,40 @@ public partial class App : Application
             _hud?.SetHudVisible(_enabled && _settings.HudEnabled);
             _tray?.SetEnabled(_enabled);
             if (!_enabled) _hud?.ClearHud();
+        });
+    }
+
+    private void RegisterConfiguredHotkeys()
+    {
+        if (_hotkey is null) return;
+        if (_toggleHotkeyId.HasValue) { _hotkey.Unregister(_toggleHotkeyId.Value); _toggleHotkeyId = null; }
+        if (_zoomHotkeyId.HasValue) { _hotkey.Unregister(_zoomHotkeyId.Value); _zoomHotkeyId = null; }
+
+        _toggleHotkeyId = _hotkey.Register(_settings.ToggleHotkeyMods, _settings.ToggleHotkeyVk,
+            () => { if (!_hotkeyCaptureActive) ToggleEnabled(); });
+        if (_toggleHotkeyId is null) Log($"WARN: toggle hotkey registration failed: {_settings.ToggleHotkeyMods:X}/{_settings.ToggleHotkeyVk:X}");
+
+        _zoomHotkeyId = _hotkey.Register(_settings.ZoomHotkeyMods, _settings.ZoomHotkeyVk,
+            () => { if (!_hotkeyCaptureActive) OpenZoomMode(); });
+        if (_zoomHotkeyId is null) Log($"WARN: zoom hotkey registration failed: {_settings.ZoomHotkeyMods:X}/{_settings.ZoomHotkeyVk:X}");
+    }
+
+    // Called by SettingsWindow while it is actively capturing a new hotkey, so the currently
+    // registered global hotkey does not also fire and surprise the user.
+    public void SetHotkeyCapture(bool active) => _hotkeyCaptureActive = active;
+
+    private void OpenZoomMode()
+    {
+        Dispatcher.Invoke(() =>
+        {
+            if (_zoomWindow is { IsLoaded: true })
+            {
+                _zoomWindow.Activate();
+                return;
+            }
+            _zoomWindow = new ZoomWindow();
+            _zoomWindow.Closed += (_, _) => _zoomWindow = null;
+            _zoomWindow.Show();
         });
     }
 

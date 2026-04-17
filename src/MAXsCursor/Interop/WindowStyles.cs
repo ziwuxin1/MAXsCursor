@@ -34,4 +34,5 @@ internal static class WindowStyles
     public const uint MOD_NOREPEAT = 0x4000;
 
     public const int VK_F5 = 0x74;
+    public const int VK_2 = 0x32;
 }
