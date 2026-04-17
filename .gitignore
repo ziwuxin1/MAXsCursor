@@ -24,3 +24,6 @@ TestResults/
 
 # Published exe at repo root (produced by `dotnet publish` + copy step; recreated on demand)
 /MAXsCursor.exe
+
+# Built installer artifacts (attached to GitHub Releases, not tracked in source)
+installer/*.exe
