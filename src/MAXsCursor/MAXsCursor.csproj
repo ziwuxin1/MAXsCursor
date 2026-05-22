@@ -12,6 +12,7 @@
     <ApplicationIcon>Assets\cursor.ico</ApplicationIcon>
     <RootNamespace>MAXsCursor</RootNamespace>
     <AssemblyName>MAXsCursor</AssemblyName>
+    <Version>1.2.0</Version>
     <StartupObject>MAXsCursor.Program</StartupObject>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- WinForms suggests setting DPI via API, but WPF is the primary UI and the manifest

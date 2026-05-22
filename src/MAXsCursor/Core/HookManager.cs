@@ -175,7 +175,7 @@ internal sealed class HookManager : IDisposable
                         // so releasing Shift after Shift+Click does not emit a bare chip.
                         ClearHeldBareModifiers();
                         var mods = GetCurrentModifiers();
-                        s_bus?.EnqueueMouseButton(new MouseButtonEvent(button, mods, data.time));
+                        s_bus?.EnqueueMouseButton(new MouseButtonEvent(button, mods, data.time, data.pt.X, data.pt.Y));
                         WakeUi();
                     }
                 }

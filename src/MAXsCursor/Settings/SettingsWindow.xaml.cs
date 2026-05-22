@@ -38,6 +38,13 @@ internal partial class SettingsWindow : Window
         HudEnabledCheck.Unchecked += (_, _) => OnHudEnabledChanged();
         MouseButtonsCheck.Checked += (_, _) => OnMouseButtonsChanged();
         MouseButtonsCheck.Unchecked += (_, _) => OnMouseButtonsChanged();
+        RippleEnabledCheck.Checked += (_, _) => OnRippleSettingsChanged();
+        RippleEnabledCheck.Unchecked += (_, _) => OnRippleSettingsChanged();
+        RippleLeftHueSlider.ValueChanged += (_, _) => OnRippleColorChanged();
+        RippleMiddleHueSlider.ValueChanged += (_, _) => OnRippleColorChanged();
+        RippleRightHueSlider.ValueChanged += (_, _) => OnRippleColorChanged();
+        RippleSizeSlider.ValueChanged += (_, _) => OnRippleSettingsChanged();
+        RippleDurationSlider.ValueChanged += (_, _) => OnRippleSettingsChanged();
 
         // PreviewKeyDown so capture fires before any TextBox or ComboBox can eat the event.
         PreviewKeyDown += OnCaptureKey;
@@ -61,6 +68,13 @@ internal partial class SettingsWindow : Window
         MouseButtonsCheck.IsChecked = _model.ShowMouseButtons;
         HudFontSizeSlider.Value = Math.Clamp(_model.HudFontSize, HudFontSizeSlider.Minimum, HudFontSizeSlider.Maximum);
 
+        RippleEnabledCheck.IsChecked = _model.ClickRippleEnabled;
+        RippleLeftHueSlider.Value = HueOf(_model.LeftClickColor);
+        RippleMiddleHueSlider.Value = HueOf(_model.MiddleClickColor);
+        RippleRightHueSlider.Value = HueOf(_model.RightClickColor);
+        RippleSizeSlider.Value = Math.Clamp(_model.RippleMaxRadius, RippleSizeSlider.Minimum, RippleSizeSlider.Maximum);
+        RippleDurationSlider.Value = Math.Clamp(_model.RippleDurationMs, RippleDurationSlider.Minimum, RippleDurationSlider.Maximum);
+
         // Select matching ComboBoxItem by Tag without triggering SelectionChanged.
         foreach (ComboBoxItem item in LanguageCombo.Items)
         {
@@ -73,6 +87,7 @@ internal partial class SettingsWindow : Window
 
         UpdateLabels();
         UpdateSwatch();
+        UpdateRippleSwatches();
         UpdatePositionStatus();
         _suppressChange = false;
     }
@@ -94,6 +109,13 @@ internal partial class SettingsWindow : Window
         HudEnabledCheck.Content = Strings.ShowKeys;
         MouseButtonsCheck.Content = Strings.ShowMouseButtons;
         HudFontSizeText.Text = Strings.KeyFontSize;
+        SectionPresentationText.Text = Strings.SectionPresentation;
+        RippleEnabledCheck.Content = Strings.RippleEnabled;
+        RippleLeftColorText.Text = Strings.RippleLeftColor;
+        RippleMiddleColorText.Text = Strings.RippleMiddleColor;
+        RippleRightColorText.Text = Strings.RippleRightColor;
+        RippleSizeText.Text = Strings.RippleSize;
+        RippleDurationText.Text = Strings.RippleDuration;
         AdjustPositionButton.Content = Strings.AdjustPosition;
         SectionShortcutsText.Text = Strings.SectionShortcuts;
         ShortcutToggleLabelText.Text = Strings.ShortcutToggleLabel;
@@ -102,6 +124,9 @@ internal partial class SettingsWindow : Window
         ShortcutZoomHintText.Text = Strings.ShortcutZoomHint;
         ToggleHotkeyButton.Content = KeyTranslator.FormatHotkey(_model.ToggleHotkeyMods, _model.ToggleHotkeyVk);
         ZoomHotkeyButton.Content = KeyTranslator.FormatHotkey(_model.ZoomHotkeyMods, _model.ZoomHotkeyVk);
+        ShortcutPresentationLabelText.Text = Strings.ShortcutPresentationLabel;
+        ShortcutPresentationHintText.Text = Strings.ShortcutPresentationHint;
+        PresentationHotkeyButton.Content = KeyTranslator.FormatHotkey(_model.PresentationHotkeyMods, _model.PresentationHotkeyVk);
         HelpHeaderText.Text = Strings.HelpHeader;
         HelpBodyText.Text = Strings.HelpBody;
         ResetButton.Content = Strings.Reset;
@@ -186,6 +211,50 @@ internal partial class SettingsWindow : Window
         _onChanged(_model);
     }
 
+    private void OnRippleSettingsChanged()
+    {
+        if (_suppressChange) return;
+        _model.ClickRippleEnabled = RippleEnabledCheck.IsChecked == true;
+        _model.RippleMaxRadius = RippleSizeSlider.Value;
+        _model.RippleDurationMs = (int)Math.Round(RippleDurationSlider.Value);
+        UpdateLabels();
+        _onChanged(_model);
+    }
+
+    private void OnRippleColorChanged()
+    {
+        if (_suppressChange) return;
+        _model.LeftClickColor = HueToHex(RippleLeftHueSlider.Value);
+        _model.MiddleClickColor = HueToHex(RippleMiddleHueSlider.Value);
+        _model.RightClickColor = HueToHex(RippleRightHueSlider.Value);
+        UpdateRippleSwatches();
+        _onChanged(_model);
+    }
+
+    // Ripple colours are vivid: fixed saturation 1.0 and lightness 0.5, hue chosen by slider.
+    private static string HueToHex(double hue)
+    {
+        var (r, g, b) = HslToRgb(hue, 1.0, 0.5);
+        return $"#{r:X2}{g:X2}{b:X2}";
+    }
+
+    private static double HueOf(string hex)
+    {
+        var rgb = ColorParse.Parse(hex);
+        var (h, _, _) = RgbToHsl(rgb.R, rgb.G, rgb.B);
+        return h;
+    }
+
+    private void UpdateRippleSwatches()
+    {
+        var l = ColorParse.Parse(_model.LeftClickColor);
+        var m = ColorParse.Parse(_model.MiddleClickColor);
+        var r = ColorParse.Parse(_model.RightClickColor);
+        RippleLeftSwatch.Background = new MediaBrush(MediaColor.FromRgb(l.R, l.G, l.B));
+        RippleMiddleSwatch.Background = new MediaBrush(MediaColor.FromRgb(m.R, m.G, m.B));
+        RippleRightSwatch.Background = new MediaBrush(MediaColor.FromRgb(r.R, r.G, r.B));
+    }
+
     private void UpdateLabels()
     {
         RadiusLabel.Text = $"{RadiusSlider.Value:F0} px";
@@ -194,6 +263,8 @@ internal partial class SettingsWindow : Window
         SaturationLabel.Text = $"{SaturationSlider.Value * 100:F0}%";
         LightnessLabel.Text = $"{LightnessSlider.Value * 100:F0}%";
         HudFontSizeLabel.Text = $"{HudFontSizeSlider.Value:F0} px";
+        RippleSizeLabel.Text = $"{RippleSizeSlider.Value:F0} px";
+        RippleDurationLabel.Text = $"{RippleDurationSlider.Value:F0} ms";
     }
 
     private void UpdateSwatch()
@@ -246,16 +317,17 @@ internal partial class SettingsWindow : Window
 
     // --- Hotkey capture ---
 
-    private enum HotkeyTarget { None, Toggle, Zoom }
+    private enum HotkeyTarget { None, Toggle, Zoom, Presentation }
     private HotkeyTarget _captureTarget = HotkeyTarget.None;
 
     private void BeginCaptureToggle_Click(object sender, RoutedEventArgs e) => BeginCapture(HotkeyTarget.Toggle);
     private void BeginCaptureZoom_Click(object sender, RoutedEventArgs e) => BeginCapture(HotkeyTarget.Zoom);
+    private void BeginCapturePresentation_Click(object sender, RoutedEventArgs e) => BeginCapture(HotkeyTarget.Presentation);
 
     private void BeginCapture(HotkeyTarget target)
     {
         _captureTarget = target;
-        (target == HotkeyTarget.Toggle ? ToggleHotkeyButton : ZoomHotkeyButton).Content = Strings.ShortcutCapturePrompt;
+        CaptureButton(target).Content = Strings.ShortcutCapturePrompt;
         if (System.Windows.Application.Current is App app) app.SetHotkeyCapture(true);
         Keyboard.Focus(this);
     }
@@ -268,15 +340,20 @@ internal partial class SettingsWindow : Window
 
         if (commit && target != HotkeyTarget.None)
         {
-            if (target == HotkeyTarget.Toggle)
+            switch (target)
             {
-                _model.ToggleHotkeyMods = mods;
-                _model.ToggleHotkeyVk = vk;
-            }
-            else
-            {
-                _model.ZoomHotkeyMods = mods;
-                _model.ZoomHotkeyVk = vk;
+                case HotkeyTarget.Toggle:
+                    _model.ToggleHotkeyMods = mods;
+                    _model.ToggleHotkeyVk = vk;
+                    break;
+                case HotkeyTarget.Zoom:
+                    _model.ZoomHotkeyMods = mods;
+                    _model.ZoomHotkeyVk = vk;
+                    break;
+                case HotkeyTarget.Presentation:
+                    _model.PresentationHotkeyMods = mods;
+                    _model.PresentationHotkeyVk = vk;
+                    break;
             }
             _onChanged(_model);
         }
@@ -284,6 +361,7 @@ internal partial class SettingsWindow : Window
         // Restore labels (either to the committed new value or back to what was there).
         ToggleHotkeyButton.Content = KeyTranslator.FormatHotkey(_model.ToggleHotkeyMods, _model.ToggleHotkeyVk);
         ZoomHotkeyButton.Content = KeyTranslator.FormatHotkey(_model.ZoomHotkeyMods, _model.ZoomHotkeyVk);
+        PresentationHotkeyButton.Content = KeyTranslator.FormatHotkey(_model.PresentationHotkeyMods, _model.PresentationHotkeyVk);
     }
 
     private void OnCaptureKey(object sender, KeyEventArgs e)
@@ -317,7 +395,7 @@ internal partial class SettingsWindow : Window
         if (mods == 0)
         {
             // Tell the user they need a modifier; keep capture open.
-            var btn = _captureTarget == HotkeyTarget.Toggle ? ToggleHotkeyButton : ZoomHotkeyButton;
+            var btn = CaptureButton(_captureTarget);
             btn.Content = Strings.ShortcutNeedsMod;
             e.Handled = true;
             return;
@@ -327,6 +405,13 @@ internal partial class SettingsWindow : Window
         EndCapture(commit: true, mods, vk);
         e.Handled = true;
     }
+
+    private System.Windows.Controls.Button CaptureButton(HotkeyTarget target) => target switch
+    {
+        HotkeyTarget.Zoom => ZoomHotkeyButton,
+        HotkeyTarget.Presentation => PresentationHotkeyButton,
+        _ => ToggleHotkeyButton
+    };
 
     private void Ok_Click(object sender, RoutedEventArgs e) => Close();
 
@@ -353,6 +438,14 @@ internal partial class SettingsWindow : Window
         _model.ToggleHotkeyVk = defaults.ToggleHotkeyVk;
         _model.ZoomHotkeyMods = defaults.ZoomHotkeyMods;
         _model.ZoomHotkeyVk = defaults.ZoomHotkeyVk;
+        _model.PresentationHotkeyMods = defaults.PresentationHotkeyMods;
+        _model.PresentationHotkeyVk = defaults.PresentationHotkeyVk;
+        _model.ClickRippleEnabled = defaults.ClickRippleEnabled;
+        _model.LeftClickColor = defaults.LeftClickColor;
+        _model.MiddleClickColor = defaults.MiddleClickColor;
+        _model.RightClickColor = defaults.RightClickColor;
+        _model.RippleMaxRadius = defaults.RippleMaxRadius;
+        _model.RippleDurationMs = defaults.RippleDurationMs;
         // keep language — user's display preference survives a settings reset
         LoadFromModel();
         ApplyStrings();

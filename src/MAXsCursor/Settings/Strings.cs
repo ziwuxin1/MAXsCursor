@@ -9,7 +9,7 @@ internal static class Strings
 
     public static void SetLanguage(string lang) => _en = string.Equals(lang, "en", StringComparison.OrdinalIgnoreCase);
 
-    private const string AppName = "MAXs Cursor v 1.1";
+    private const string AppName = "MAXs Cursor v 1.2";
 
     // Settings window
     public static string AppTitle => _en ? $"{AppName} Settings" : $"{AppName} 设置";
@@ -24,6 +24,15 @@ internal static class Strings
     public static string ShowKeys => _en ? "Show keys" : "显示按键";
     public static string ShowMouseButtons => _en ? "Show mouse buttons" : "显示鼠标按键";
     public static string KeyFontSize => _en ? "Key text size" : "按键文字大小";
+
+    // Click ripple section
+    public static string SectionPresentation => _en ? "Click ripple" : "点击水波纹";
+    public static string RippleEnabled => _en ? "Enable ripple" : "启用水波纹";
+    public static string RippleLeftColor => _en ? "Left click color" : "左键颜色";
+    public static string RippleMiddleColor => _en ? "Middle click color" : "中键颜色";
+    public static string RippleRightColor => _en ? "Right click color" : "右键颜色";
+    public static string RippleSize => _en ? "Ripple size" : "水波纹大小";
+    public static string RippleDuration => _en ? "Ripple duration" : "水波纹时长";
 
     // Mouse button chip text
     public static string MouseLeft => _en ? "Left click" : "左键";
@@ -62,6 +71,8 @@ internal static class Strings
     public static string ShortcutToggleHint => _en ? "Show / hide the cursor ring and key HUD" : "显示 / 隐藏光标环和按键 HUD";
     public static string ShortcutZoomLabel => _en ? "Zoom + annotate" : "放大并标注";
     public static string ShortcutZoomHint => _en ? "Freeze the screen, zoom in, draw on top" : "冻结屏幕，放大后可以画图";
+    public static string ShortcutPresentationLabel => _en ? "Click ripple" : "点击水波纹";
+    public static string ShortcutPresentationHint => _en ? "Coloured ripple on each click" : "点击时显示彩色水波纹";
     public static string ShortcutCapturePrompt => _en ? "Press new shortcut..." : "按下新快捷键...";
     public static string ShortcutConflictFail => _en ? "Shortcut unavailable, another app may own it" : "快捷键不可用，可能被其它程序占用";
     public static string ShortcutNeedsMod => _en ? "Need a modifier key (Ctrl / Shift / Alt / Win)" : "需要一个修饰键 (Ctrl / Shift / Alt / Win)";
@@ -91,6 +102,11 @@ internal static class Strings
 • 数字键 1–7 = 切换颜色；+ / - = 粗细；B = 画笔；E = 橡皮；C = 清除；Ctrl+Z = 撤销。
 • Ctrl+S = 保存为 PNG；Ctrl+C = 复制到剪贴板；Esc = 退出。
 
+【点击水波纹】
+• 勾选 ""启用水波纹"" 即可开启；快捷键 Alt+F6 是同一个开关，按一下切换（快捷键可改）。
+• 开启后，左键 / 中键 / 右键点击时会从鼠标处冒出不同颜色的水波纹，方便观众看清点了哪里。
+• 颜色 / 大小 / 时长在 ""点击水波纹"" 区调整。
+
 【系统托盘】
 • 右键菜单：启用 / 禁用、设置、退出。
 • 双击托盘图标：切换启用 / 禁用。";
@@ -115,6 +131,11 @@ Zoom + annotate
 • Wheel = zoom 1x–5x. Middle drag or Space+left drag = pan.
 • 1–7 = color, + / - = thickness, B = pen, E = eraser, C = clear, Ctrl+Z = undo.
 • Ctrl+S = save as PNG, Ctrl+C = copy to clipboard, Esc = exit.
+
+Click ripple
+• Tick ""Enable ripple"" to turn it on. Alt+F6 is the same switch, press to toggle (rebindable).
+• When on, left / middle / right clicks emit a coloured ripple from the pointer so viewers see exactly where you clicked.
+• Color / size / duration tune in the Click ripple section.
 
 System tray
 • Right-click menu: Enable / Disable, Settings, Quit.

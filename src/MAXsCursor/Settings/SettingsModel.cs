@@ -33,6 +33,22 @@ internal sealed class SettingsModel
     public uint ZoomHotkeyMods { get; set; } = 0x0002;     // Ctrl
     public uint ZoomHotkeyVk { get; set; } = 0x32;         // 2
 
+    // --- Click ripple mode (coloured ripple on each click) ---
+    // Runtime on/off is NOT persisted: the mode always starts off and is toggled by hotkey.
+    // Only appearance and the hotkey binding persist.
+
+    // Click ripple toggle hotkey. Default Alt+F6 (VK_F6 = 0x75).
+    public uint PresentationHotkeyMods { get; set; } = 0x0001; // Alt
+    public uint PresentationHotkeyVk { get; set; } = 0x75;     // F6
+
+    // Click ripple: expanding ring per click, distinct colour per button.
+    public bool ClickRippleEnabled { get; set; } = true;
+    public string LeftClickColor { get; set; } = "#FFE000";    // yellow
+    public string MiddleClickColor { get; set; } = "#00E676";  // green
+    public string RightClickColor { get; set; } = "#2979FF";   // blue
+    public double RippleMaxRadius { get; set; } = 48.0;        // dip
+    public int RippleDurationMs { get; set; } = 420;
+
     // UI language. "zh" or "en". Default "zh" since the primary user is Chinese-speaking.
     public string Language { get; set; } = "zh";
 
@@ -54,6 +70,14 @@ internal sealed class SettingsModel
         ToggleHotkeyVk = ToggleHotkeyVk,
         ZoomHotkeyMods = ZoomHotkeyMods,
         ZoomHotkeyVk = ZoomHotkeyVk,
+        PresentationHotkeyMods = PresentationHotkeyMods,
+        PresentationHotkeyVk = PresentationHotkeyVk,
+        ClickRippleEnabled = ClickRippleEnabled,
+        LeftClickColor = LeftClickColor,
+        MiddleClickColor = MiddleClickColor,
+        RightClickColor = RightClickColor,
+        RippleMaxRadius = RippleMaxRadius,
+        RippleDurationMs = RippleDurationMs,
         Language = Language
     };
 }
