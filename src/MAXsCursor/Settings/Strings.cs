@@ -9,7 +9,7 @@ internal static class Strings
 
     public static void SetLanguage(string lang) => _en = string.Equals(lang, "en", StringComparison.OrdinalIgnoreCase);
 
-    private const string AppName = "MAXs Cursor v 1.1";
+    private const string AppName = "MAXs Cursor v 1.2";
 
     // Settings window
     public static string AppTitle => _en ? $"{AppName} Settings" : $"{AppName} 设置";
