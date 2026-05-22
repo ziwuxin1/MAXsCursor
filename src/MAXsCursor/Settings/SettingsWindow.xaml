@@ -178,66 +178,6 @@
                            FontWeight="Bold" Margin="0,0,0,8" Opacity="0.85"/>
 
                 <StackPanel Margin="0,0,0,16">
-                    <StackPanel Margin="0,0,0,10">
-                        <DockPanel>
-                            <TextBlock x:Name="PresSizeText" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="PresSizeLabel" HorizontalAlignment="Right"
-                                       Opacity="0.7" DockPanel.Dock="Right"/>
-                        </DockPanel>
-                        <Slider x:Name="PresSizeSlider" Minimum="24" Maximum="120" Value="64"
-                                SmallChange="1" LargeChange="4" Margin="0,4,0,0"/>
-                    </StackPanel>
-
-                    <StackPanel Margin="0,0,0,10">
-                        <DockPanel>
-                            <TextBlock x:Name="PresHoleText" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="PresHoleLabel" HorizontalAlignment="Right"
-                                       Opacity="0.7" DockPanel.Dock="Right"/>
-                        </DockPanel>
-                        <Slider x:Name="PresHoleSlider" Minimum="0" Maximum="40" Value="16"
-                                SmallChange="1" LargeChange="4" Margin="0,4,0,0"/>
-                    </StackPanel>
-
-                    <StackPanel Margin="0,0,0,10">
-                        <DockPanel>
-                            <TextBlock x:Name="PresBorderText" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="PresBorderLabel" HorizontalAlignment="Right"
-                                       Opacity="0.7" DockPanel.Dock="Right"/>
-                        </DockPanel>
-                        <Slider x:Name="PresBorderSlider" Minimum="0" Maximum="10" Value="3"
-                                SmallChange="0.5" LargeChange="1" Margin="0,4,0,0"/>
-                    </StackPanel>
-
-                    <StackPanel Margin="0,0,0,10">
-                        <DockPanel>
-                            <TextBlock x:Name="PresOpacityText" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="PresOpacityLabel" HorizontalAlignment="Right"
-                                       Opacity="0.7" DockPanel.Dock="Right"/>
-                        </DockPanel>
-                        <Slider x:Name="PresOpacitySlider" Minimum="0.2" Maximum="1" Value="0.85"
-                                SmallChange="0.05" LargeChange="0.1" Margin="0,4,0,0"/>
-                    </StackPanel>
-
-                    <StackPanel Margin="0,0,0,12">
-                        <DockPanel>
-                            <TextBlock x:Name="PresColorText" FontWeight="SemiBold"/>
-                            <Border x:Name="PresColorSwatch" Width="90" Height="20"
-                                    BorderThickness="1" CornerRadius="3"
-                                    HorizontalAlignment="Right" DockPanel.Dock="Right"
-                                    Background="#FFFFC400">
-                                <Border.BorderBrush>
-                                    <SolidColorBrush Color="{DynamicResource TextFillColorPrimary}" Opacity="0.4"/>
-                                </Border.BorderBrush>
-                            </Border>
-                        </DockPanel>
-                        <Slider x:Name="PresHueSlider" Minimum="0" Maximum="360" Value="48"
-                                SmallChange="1" LargeChange="15" Margin="0,6,0,0"/>
-                        <Slider x:Name="PresSatSlider" Minimum="0" Maximum="1" Value="1"
-                                SmallChange="0.05" LargeChange="0.2" Margin="0,4,0,0"/>
-                        <Slider x:Name="PresLightSlider" Minimum="0.1" Maximum="0.9" Value="0.5"
-                                SmallChange="0.05" LargeChange="0.1" Margin="0,4,0,0"/>
-                    </StackPanel>
-
                     <CheckBox x:Name="RippleEnabledCheck" Margin="0,0,0,10"/>
 
                     <DockPanel Margin="0,0,0,8">

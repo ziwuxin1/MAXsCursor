@@ -38,13 +38,6 @@ internal partial class SettingsWindow : Window
         HudEnabledCheck.Unchecked += (_, _) => OnHudEnabledChanged();
         MouseButtonsCheck.Checked += (_, _) => OnMouseButtonsChanged();
         MouseButtonsCheck.Unchecked += (_, _) => OnMouseButtonsChanged();
-        PresSizeSlider.ValueChanged += (_, _) => OnPresAppearanceChanged();
-        PresHoleSlider.ValueChanged += (_, _) => OnPresAppearanceChanged();
-        PresBorderSlider.ValueChanged += (_, _) => OnPresAppearanceChanged();
-        PresOpacitySlider.ValueChanged += (_, _) => OnPresAppearanceChanged();
-        PresHueSlider.ValueChanged += (_, _) => OnPresColorChanged();
-        PresSatSlider.ValueChanged += (_, _) => OnPresColorChanged();
-        PresLightSlider.ValueChanged += (_, _) => OnPresColorChanged();
         RippleEnabledCheck.Checked += (_, _) => OnRippleSettingsChanged();
         RippleEnabledCheck.Unchecked += (_, _) => OnRippleSettingsChanged();
         RippleLeftHueSlider.ValueChanged += (_, _) => OnRippleColorChanged();
@@ -74,16 +67,6 @@ internal partial class SettingsWindow : Window
         HudEnabledCheck.IsChecked = _model.HudEnabled;
         MouseButtonsCheck.IsChecked = _model.ShowMouseButtons;
         HudFontSizeSlider.Value = Math.Clamp(_model.HudFontSize, HudFontSizeSlider.Minimum, HudFontSizeSlider.Maximum);
-        PresSizeSlider.Value = Math.Clamp(_model.BigCursorSize, PresSizeSlider.Minimum, PresSizeSlider.Maximum);
-        PresHoleSlider.Value = Math.Clamp(_model.BigCursorHoleSize, PresHoleSlider.Minimum, PresHoleSlider.Maximum);
-        PresBorderSlider.Value = Math.Clamp(_model.BigCursorBorderThickness, PresBorderSlider.Minimum, PresBorderSlider.Maximum);
-        PresOpacitySlider.Value = Math.Clamp(_model.BigCursorOpacity, PresOpacitySlider.Minimum, PresOpacitySlider.Maximum);
-
-        var presRgb = ColorParse.Parse(_model.BigCursorColor);
-        var (ph, ps, pl) = RgbToHsl(presRgb.R, presRgb.G, presRgb.B);
-        PresHueSlider.Value = ph;
-        PresSatSlider.Value = ps;
-        PresLightSlider.Value = Math.Clamp(pl, PresLightSlider.Minimum, PresLightSlider.Maximum);
 
         RippleEnabledCheck.IsChecked = _model.ClickRippleEnabled;
         RippleLeftHueSlider.Value = HueOf(_model.LeftClickColor);
@@ -104,7 +87,6 @@ internal partial class SettingsWindow : Window
 
         UpdateLabels();
         UpdateSwatch();
-        UpdatePresSwatch();
         UpdateRippleSwatches();
         UpdatePositionStatus();
         _suppressChange = false;
@@ -128,11 +110,6 @@ internal partial class SettingsWindow : Window
         MouseButtonsCheck.Content = Strings.ShowMouseButtons;
         HudFontSizeText.Text = Strings.KeyFontSize;
         SectionPresentationText.Text = Strings.SectionPresentation;
-        PresSizeText.Text = Strings.PresBigSize;
-        PresHoleText.Text = Strings.PresHole;
-        PresBorderText.Text = Strings.PresBorder;
-        PresOpacityText.Text = Strings.PresOpacity;
-        PresColorText.Text = Strings.PresColor;
         RippleEnabledCheck.Content = Strings.RippleEnabled;
         RippleLeftColorText.Text = Strings.RippleLeftColor;
         RippleMiddleColorText.Text = Strings.RippleMiddleColor;
@@ -234,27 +211,6 @@ internal partial class SettingsWindow : Window
         _onChanged(_model);
     }
 
-    private void OnPresAppearanceChanged()
-    {
-        if (_suppressChange) return;
-        _model.BigCursorSize = PresSizeSlider.Value;
-        _model.BigCursorHoleSize = PresHoleSlider.Value;
-        _model.BigCursorBorderThickness = PresBorderSlider.Value;
-        _model.BigCursorOpacity = PresOpacitySlider.Value;
-        UpdateLabels();
-        UpdatePresSwatch();
-        _onChanged(_model);
-    }
-
-    private void OnPresColorChanged()
-    {
-        if (_suppressChange) return;
-        var (r, g, b) = HslToRgb(PresHueSlider.Value, PresSatSlider.Value, PresLightSlider.Value);
-        _model.BigCursorColor = $"#{r:X2}{g:X2}{b:X2}";
-        UpdatePresSwatch();
-        _onChanged(_model);
-    }
-
     private void OnRippleSettingsChanged()
     {
         if (_suppressChange) return;
@@ -289,13 +245,6 @@ internal partial class SettingsWindow : Window
         return h;
     }
 
-    private void UpdatePresSwatch()
-    {
-        var rgb = ColorParse.Parse(_model.BigCursorColor);
-        var alpha = (byte)Math.Round(255 * _model.BigCursorOpacity);
-        PresColorSwatch.Background = new MediaBrush(MediaColor.FromArgb(alpha, rgb.R, rgb.G, rgb.B));
-    }
-
     private void UpdateRippleSwatches()
     {
         var l = ColorParse.Parse(_model.LeftClickColor);
@@ -314,10 +263,6 @@ internal partial class SettingsWindow : Window
         SaturationLabel.Text = $"{SaturationSlider.Value * 100:F0}%";
         LightnessLabel.Text = $"{LightnessSlider.Value * 100:F0}%";
         HudFontSizeLabel.Text = $"{HudFontSizeSlider.Value:F0} px";
-        PresSizeLabel.Text = $"{PresSizeSlider.Value:F0} px";
-        PresHoleLabel.Text = $"{PresHoleSlider.Value:F0} px";
-        PresBorderLabel.Text = $"{PresBorderSlider.Value:F1} px";
-        PresOpacityLabel.Text = $"{PresOpacitySlider.Value * 100:F0}%";
         RippleSizeLabel.Text = $"{RippleSizeSlider.Value:F0} px";
         RippleDurationLabel.Text = $"{RippleDurationSlider.Value:F0} ms";
     }
@@ -495,12 +440,6 @@ internal partial class SettingsWindow : Window
         _model.ZoomHotkeyVk = defaults.ZoomHotkeyVk;
         _model.PresentationHotkeyMods = defaults.PresentationHotkeyMods;
         _model.PresentationHotkeyVk = defaults.PresentationHotkeyVk;
-        _model.BigCursorSize = defaults.BigCursorSize;
-        _model.BigCursorHoleSize = defaults.BigCursorHoleSize;
-        _model.BigCursorBorderThickness = defaults.BigCursorBorderThickness;
-        _model.BigCursorColor = defaults.BigCursorColor;
-        _model.BigCursorBorderColor = defaults.BigCursorBorderColor;
-        _model.BigCursorOpacity = defaults.BigCursorOpacity;
         _model.ClickRippleEnabled = defaults.ClickRippleEnabled;
         _model.LeftClickColor = defaults.LeftClickColor;
         _model.MiddleClickColor = defaults.MiddleClickColor;

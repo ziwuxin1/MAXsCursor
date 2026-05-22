@@ -25,14 +25,9 @@ internal static class Strings
     public static string ShowMouseButtons => _en ? "Show mouse buttons" : "显示鼠标按键";
     public static string KeyFontSize => _en ? "Key text size" : "按键文字大小";
 
-    // Presentation cursor section
-    public static string SectionPresentation => _en ? "Presentation cursor" : "演示光标";
-    public static string PresBigSize => _en ? "Cursor size" : "光标大小";
-    public static string PresHole => _en ? "Centre hole" : "中心孔";
-    public static string PresBorder => _en ? "Border width" : "描边宽度";
-    public static string PresColor => _en ? "Cursor color" : "光标颜色";
-    public static string PresOpacity => _en ? "Cursor opacity" : "光标透明度";
-    public static string RippleEnabled => _en ? "Click ripple" : "点击水波纹";
+    // Click ripple section
+    public static string SectionPresentation => _en ? "Click ripple" : "点击水波纹";
+    public static string RippleEnabled => _en ? "Enable ripple" : "启用水波纹";
     public static string RippleLeftColor => _en ? "Left click color" : "左键颜色";
     public static string RippleMiddleColor => _en ? "Middle click color" : "中键颜色";
     public static string RippleRightColor => _en ? "Right click color" : "右键颜色";
@@ -76,8 +71,8 @@ internal static class Strings
     public static string ShortcutToggleHint => _en ? "Show / hide the cursor ring and key HUD" : "显示 / 隐藏光标环和按键 HUD";
     public static string ShortcutZoomLabel => _en ? "Zoom + annotate" : "放大并标注";
     public static string ShortcutZoomHint => _en ? "Freeze the screen, zoom in, draw on top" : "冻结屏幕，放大后可以画图";
-    public static string ShortcutPresentationLabel => _en ? "Presentation cursor" : "演示光标";
-    public static string ShortcutPresentationHint => _en ? "Enlarged high-contrast cursor + click ripple" : "放大高对比光标 + 点击水波纹";
+    public static string ShortcutPresentationLabel => _en ? "Click ripple" : "点击水波纹";
+    public static string ShortcutPresentationHint => _en ? "Coloured ripple on each click" : "点击时显示彩色水波纹";
     public static string ShortcutCapturePrompt => _en ? "Press new shortcut..." : "按下新快捷键...";
     public static string ShortcutConflictFail => _en ? "Shortcut unavailable, another app may own it" : "快捷键不可用，可能被其它程序占用";
     public static string ShortcutNeedsMod => _en ? "Need a modifier key (Ctrl / Shift / Alt / Win)" : "需要一个修饰键 (Ctrl / Shift / Alt / Win)";
@@ -107,11 +102,10 @@ internal static class Strings
 • 数字键 1–7 = 切换颜色；+ / - = 粗细；B = 画笔；E = 橡皮；C = 清除；Ctrl+Z = 撤销。
 • Ctrl+S = 保存为 PNG；Ctrl+C = 复制到剪贴板；Esc = 退出。
 
-【演示光标】
+【点击水波纹】
 • 默认快捷键 Alt+F6（可在 ""快捷键"" 区重新指定），按一下开启，再按关闭。
-• 开启后鼠标处显示一个放大、高对比的大光标（中间留小孔，方便看清目标）。
-• 左键 / 中键 / 右键点击时会冒出不同颜色的水波纹，方便观众看清点了哪里。
-• 大小 / 颜色 / 透明度 / 水波纹在 ""演示光标"" 区调整。
+• 开启后，左键 / 中键 / 右键点击时会从鼠标处冒出不同颜色的水波纹，方便观众看清点了哪里。
+• 颜色 / 大小 / 时长在 ""点击水波纹"" 区调整。
 
 【系统托盘】
 • 右键菜单：启用 / 禁用、设置、退出。
@@ -138,11 +132,10 @@ Zoom + annotate
 • 1–7 = color, + / - = thickness, B = pen, E = eraser, C = clear, Ctrl+Z = undo.
 • Ctrl+S = save as PNG, Ctrl+C = copy to clipboard, Esc = exit.
 
-Presentation cursor
+Click ripple
 • Alt+F6 by default (rebindable in Shortcuts). Press once to enable, again to disable.
-• Shows an enlarged high-contrast cursor at the pointer, with a small centre hole so the precise target stays visible.
-• Left / middle / right clicks emit a coloured ripple so viewers see exactly where you clicked.
-• Size / color / opacity / ripple tune in the Presentation cursor section.
+• When on, left / middle / right clicks emit a coloured ripple from the pointer so viewers see exactly where you clicked.
+• Color / size / duration tune in the Click ripple section.
 
 System tray
 • Right-click menu: Enable / Disable, Settings, Quit.

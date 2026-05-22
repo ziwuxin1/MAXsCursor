@@ -64,16 +64,6 @@ public partial class App : Application
                 initial.RingRadius, initial.RingThickness, initial.RingOpacity);
         });
 
-        _hook.InitializeBigCursor(sizeDip: 220, dpiScale: dpiScale, configure: bc =>
-        {
-            var fill = ColorParse.Parse(initial.BigCursorColor);
-            var border = ColorParse.Parse(initial.BigCursorBorderColor);
-            bc.ApplyAppearance(
-                fill.R, fill.G, fill.B, border.R, border.G, border.B,
-                initial.BigCursorSize, initial.BigCursorHoleSize,
-                initial.BigCursorBorderThickness, initial.BigCursorOpacity, dpiScale);
-        });
-
         _ripple = new ClickRippleController(dpiScale);
         ApplyRippleSettings();
 
@@ -180,17 +170,6 @@ public partial class App : Application
             _settings.RingRadius, _settings.RingThickness, _settings.RingOpacity);
     }
 
-    private void ApplyBigCursorSettings()
-    {
-        if (_hook is null) return;
-        var fill = ColorParse.Parse(_settings.BigCursorColor);
-        var border = ColorParse.Parse(_settings.BigCursorBorderColor);
-        _hook.ApplyBigCursor(
-            fill.R, fill.G, fill.B, border.R, border.G, border.B,
-            _settings.BigCursorSize, _settings.BigCursorHoleSize,
-            _settings.BigCursorBorderThickness, _settings.BigCursorOpacity, DetectDpiScale());
-    }
-
     private void ApplyRippleSettings()
     {
         if (_ripple is null) return;
@@ -244,7 +223,6 @@ public partial class App : Application
         }
 
         ApplyCursorSettings();
-        ApplyBigCursorSettings();
         ApplyRippleSettings();
         if (_hud is not null)
         {
@@ -263,7 +241,6 @@ public partial class App : Application
             _hook?.SetCursorVisible(_enabled);
             _hud?.SetHudVisible(_enabled && _settings.HudEnabled);
             _tray?.SetEnabled(_enabled);
-            _hook?.SetBigCursorVisible(_enabled && _presentationOn);
             if (!_enabled) _ripple?.Clear();
             if (!_enabled) _hud?.ClearHud();
         });
@@ -298,7 +275,6 @@ public partial class App : Application
         Dispatcher.Invoke(() =>
         {
             _presentationOn = !_presentationOn;
-            _hook?.SetBigCursorVisible(_enabled && _presentationOn);
             if (!_presentationOn) _ripple?.Clear();
         });
     }

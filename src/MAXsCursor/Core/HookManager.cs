@@ -30,11 +30,6 @@ internal sealed class HookManager : IDisposable
     // thread. Set after the cursor window is created on the same thread.
     private static Action<int, int>? s_onMouseMove;
 
-    // Second mouse-move handler for the presentation big cursor. Only invoked while the
-    // big cursor is visible, so a hidden mode costs nothing in the hot path.
-    private static Action<int, int>? s_onMouseMoveBig;
-    private static volatile bool s_bigCursorVisible;
-
     // Where to post WM_APP_INPUT_WAKE for non-mouse input (keyboard). The HUD window.
     private static nint s_wakeHwnd;
     public static void SetWakeHwnd(nint hwnd) => s_wakeHwnd = hwnd;
@@ -49,9 +44,6 @@ internal sealed class HookManager : IDisposable
 
     // Cursor window lives on the hook thread.
     private NativeCursorWindow? _cursor;
-
-    // Big cursor window also lives on the hook thread, alongside the ring.
-    private BigCursorWindow? _bigCursor;
 
     public HookManager(EventBus bus)
     {
@@ -113,42 +105,6 @@ internal sealed class HookManager : IDisposable
         RunOnHookThread(() => _cursor?.SetVisible(visible));
     }
 
-    // Create the big cursor on the hook thread but leave it hidden: presentation mode
-    // starts off. Wires the move handler so it tracks the cursor once shown.
-    public void InitializeBigCursor(int sizeDip, double dpiScale, Action<BigCursorWindow> configure)
-    {
-        RunOnHookThread(() =>
-        {
-            _bigCursor = new BigCursorWindow(sizeDip, dpiScale);
-            configure(_bigCursor);
-            s_onMouseMoveBig = _bigCursor.FollowCursor;
-        });
-    }
-
-    public void ApplyBigCursor(
-        byte fillR, byte fillG, byte fillB,
-        byte borderR, byte borderG, byte borderB,
-        double sizeDip, double holeDip, double borderDip, double opacity, double dpiScale)
-    {
-        RunOnHookThread(() => _bigCursor?.ApplyAppearance(
-            fillR, fillG, fillB, borderR, borderG, borderB,
-            sizeDip, holeDip, borderDip, opacity, dpiScale));
-    }
-
-    public void SetBigCursorVisible(bool visible)
-    {
-        RunOnHookThread(() =>
-        {
-            _bigCursor?.SetVisible(visible);
-            s_bigCursorVisible = visible;
-            // Snap to the current cursor position so it appears under the pointer immediately.
-            if (visible && _bigCursor is not null && Win32.GetCursorPos(out var pt))
-            {
-                _bigCursor.FollowCursor(pt.X, pt.Y);
-            }
-        });
-    }
-
     private void ThreadMain()
     {
         try
@@ -184,12 +140,8 @@ internal sealed class HookManager : IDisposable
         finally
         {
             s_onMouseMove = null;
-            s_onMouseMoveBig = null;
-            s_bigCursorVisible = false;
             _cursor?.Dispose();
             _cursor = null;
-            _bigCursor?.Dispose();
-            _bigCursor = null;
             if (s_mouseHook != nint.Zero) { Win32.UnhookWindowsHookEx(s_mouseHook); s_mouseHook = nint.Zero; }
             if (s_keyboardHook != nint.Zero) { Win32.UnhookWindowsHookEx(s_keyboardHook); s_keyboardHook = nint.Zero; }
             s_mouseProc = null;
@@ -213,11 +165,6 @@ internal sealed class HookManager : IDisposable
                 {
                     var handler = s_onMouseMove;
                     handler?.Invoke(data.pt.X, data.pt.Y);
-                    if (s_bigCursorVisible)
-                    {
-                        var bigHandler = s_onMouseMoveBig;
-                        bigHandler?.Invoke(data.pt.X, data.pt.Y);
-                    }
                 }
                 else
                 {
