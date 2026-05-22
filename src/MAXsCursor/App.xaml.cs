@@ -21,11 +21,14 @@ public partial class App : Application
     private EventBus? _bus;
     private SettingsWindow? _settingsWindow;
     private ZoomWindow? _zoomWindow;
+    private ClickRippleController? _ripple;
     private SettingsModel _settings = SettingsModel.Defaults();
     private bool _enabled = true;
+    private bool _presentationOn;
 
     private int? _toggleHotkeyId;
     private int? _zoomHotkeyId;
+    private int? _presentationHotkeyId;
     private bool _hotkeyCaptureActive;
 
     protected override void OnStartup(StartupEventArgs e)
@@ -60,6 +63,19 @@ public partial class App : Application
             cursor.ApplyRing(rgb.R, rgb.G, rgb.B,
                 initial.RingRadius, initial.RingThickness, initial.RingOpacity);
         });
+
+        _hook.InitializeBigCursor(sizeDip: 220, dpiScale: dpiScale, configure: bc =>
+        {
+            var fill = ColorParse.Parse(initial.BigCursorColor);
+            var border = ColorParse.Parse(initial.BigCursorBorderColor);
+            bc.ApplyAppearance(
+                fill.R, fill.G, fill.B, border.R, border.G, border.B,
+                initial.BigCursorSize, initial.BigCursorHoleSize,
+                initial.BigCursorBorderThickness, initial.BigCursorOpacity, dpiScale);
+        });
+
+        _ripple = new ClickRippleController(dpiScale);
+        ApplyRippleSettings();
 
         // Render clock drives HUD fade only. Cursor is driven directly from the hook
         // callback on the hook thread, bypassing the UI-thread cadence entirely.
@@ -106,6 +122,7 @@ public partial class App : Application
         DrainKeysNow();
         DrainMouseButtonsNow();
         _hud?.TickHud();
+        _ripple?.Tick();
     }
 
     private void DrainKeysNow()
@@ -134,7 +151,13 @@ public partial class App : Application
         var pushed = false;
         while (_bus.TryDequeueMouseButton(out var btn))
         {
-            // Always drain, never back-pressure. Just skip UI if user disabled the setting.
+            // Presentation ripple is independent of the HUD's ShowMouseButtons toggle.
+            if (_presentationOn && _enabled)
+            {
+                _ripple?.Spawn(btn.Button, btn.X, btn.Y);
+            }
+
+            // Always drain, never back-pressure. Just skip the HUD if the user disabled it.
             if (!_settings.ShowMouseButtons) continue;
             var text = KeyTranslator.MouseToDisplayText(btn.Button, btn.Modifiers);
             if (text is not null)
@@ -155,6 +178,28 @@ public partial class App : Application
         var rgb = ColorParse.Parse(_settings.RingColor);
         _hook.ApplyCursorRing(rgb.R, rgb.G, rgb.B,
             _settings.RingRadius, _settings.RingThickness, _settings.RingOpacity);
+    }
+
+    private void ApplyBigCursorSettings()
+    {
+        if (_hook is null) return;
+        var fill = ColorParse.Parse(_settings.BigCursorColor);
+        var border = ColorParse.Parse(_settings.BigCursorBorderColor);
+        _hook.ApplyBigCursor(
+            fill.R, fill.G, fill.B, border.R, border.G, border.B,
+            _settings.BigCursorSize, _settings.BigCursorHoleSize,
+            _settings.BigCursorBorderThickness, _settings.BigCursorOpacity, DetectDpiScale());
+    }
+
+    private void ApplyRippleSettings()
+    {
+        if (_ripple is null) return;
+        var l = ColorParse.Parse(_settings.LeftClickColor);
+        var m = ColorParse.Parse(_settings.MiddleClickColor);
+        var r = ColorParse.Parse(_settings.RightClickColor);
+        _ripple.ApplySettings(
+            _settings.ClickRippleEnabled, _settings.RippleMaxRadius, _settings.RippleDurationMs,
+            (l.R, l.G, l.B), (m.R, m.G, m.B), (r.R, r.G, r.B));
     }
 
     private void ShowSettings()
@@ -183,6 +228,8 @@ public partial class App : Application
                          || _settings.ToggleHotkeyVk != updated.ToggleHotkeyVk;
         var zoomChanged = _settings.ZoomHotkeyMods != updated.ZoomHotkeyMods
                        || _settings.ZoomHotkeyVk != updated.ZoomHotkeyVk;
+        var presentationChanged = _settings.PresentationHotkeyMods != updated.PresentationHotkeyMods
+                               || _settings.PresentationHotkeyVk != updated.PresentationHotkeyVk;
         _settings = updated.Clone();
 
         if (languageChanged)
@@ -191,12 +238,14 @@ public partial class App : Application
             _tray?.UpdateLanguage();
         }
 
-        if (toggleChanged || zoomChanged)
+        if (toggleChanged || zoomChanged || presentationChanged)
         {
             RegisterConfiguredHotkeys();
         }
 
         ApplyCursorSettings();
+        ApplyBigCursorSettings();
+        ApplyRippleSettings();
         if (_hud is not null)
         {
             _hud.ApplyFontSize(_settings.HudFontSize);
@@ -214,6 +263,8 @@ public partial class App : Application
             _hook?.SetCursorVisible(_enabled);
             _hud?.SetHudVisible(_enabled && _settings.HudEnabled);
             _tray?.SetEnabled(_enabled);
+            _hook?.SetBigCursorVisible(_enabled && _presentationOn);
+            if (!_enabled) _ripple?.Clear();
             if (!_enabled) _hud?.ClearHud();
         });
     }
@@ -223,6 +274,7 @@ public partial class App : Application
         if (_hotkey is null) return;
         if (_toggleHotkeyId.HasValue) { _hotkey.Unregister(_toggleHotkeyId.Value); _toggleHotkeyId = null; }
         if (_zoomHotkeyId.HasValue) { _hotkey.Unregister(_zoomHotkeyId.Value); _zoomHotkeyId = null; }
+        if (_presentationHotkeyId.HasValue) { _hotkey.Unregister(_presentationHotkeyId.Value); _presentationHotkeyId = null; }
 
         _toggleHotkeyId = _hotkey.Register(_settings.ToggleHotkeyMods, _settings.ToggleHotkeyVk,
             () => { if (!_hotkeyCaptureActive) ToggleEnabled(); });
@@ -231,11 +283,25 @@ public partial class App : Application
         _zoomHotkeyId = _hotkey.Register(_settings.ZoomHotkeyMods, _settings.ZoomHotkeyVk,
             () => { if (!_hotkeyCaptureActive) OpenZoomMode(); });
         if (_zoomHotkeyId is null) Log($"WARN: zoom hotkey registration failed: {_settings.ZoomHotkeyMods:X}/{_settings.ZoomHotkeyVk:X}");
+
+        _presentationHotkeyId = _hotkey.Register(_settings.PresentationHotkeyMods, _settings.PresentationHotkeyVk,
+            () => { if (!_hotkeyCaptureActive) TogglePresentation(); });
+        if (_presentationHotkeyId is null) Log($"WARN: presentation hotkey registration failed: {_settings.PresentationHotkeyMods:X}/{_settings.PresentationHotkeyVk:X}");
     }
 
     // Called by SettingsWindow while it is actively capturing a new hotkey, so the currently
     // registered global hotkey does not also fire and surprise the user.
     public void SetHotkeyCapture(bool active) => _hotkeyCaptureActive = active;
+
+    private void TogglePresentation()
+    {
+        Dispatcher.Invoke(() =>
+        {
+            _presentationOn = !_presentationOn;
+            _hook?.SetBigCursorVisible(_enabled && _presentationOn);
+            if (!_presentationOn) _ripple?.Clear();
+        });
+    }
 
     private void OpenZoomMode()
     {
@@ -266,6 +332,8 @@ public partial class App : Application
     {
         _clock?.Dispose();
         _clock = null;
+        _ripple?.Dispose();
+        _ripple = null;
         _hook?.Dispose();
         _hook = null;
         _hotkey?.Dispose();
