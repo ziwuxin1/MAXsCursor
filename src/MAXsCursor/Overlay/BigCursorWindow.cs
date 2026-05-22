@@ -59,7 +59,9 @@ internal sealed class BigCursorWindow : IDisposable
         double sizeDip, double holeDip, double borderDip, double opacity, double dpiScale)
     {
         var alpha = (byte)Math.Round(255 * Math.Clamp(opacity, 0.0, 1.0));
-        var outerR = Math.Max(4.0, sizeDip * dpiScale / 2.0);
+        // Clamp to the fixed bitmap bounds so a larger settings size cannot draw past the edge.
+        var maxR = _sizePx / 2.0 - 1.0;
+        var outerR = Math.Clamp(sizeDip * dpiScale / 2.0, 4.0, maxR);
         var innerR = Math.Clamp(holeDip * dpiScale / 2.0, 0.0, outerR - 2.0);
         var borderPx = Math.Max(1.0, borderDip * dpiScale);
         DrawCursor(alpha, fillR, fillG, fillB, borderR, borderG, borderB, outerR, innerR, borderPx);
