@@ -21,7 +21,7 @@ internal enum MouseButton : byte
     None, Left, Right, Middle, X1, X2, WheelUp, WheelDown
 }
 
-internal readonly record struct MouseButtonEvent(MouseButton Button, ModifierMask Modifiers, long TimestampTicks);
+internal readonly record struct MouseButtonEvent(MouseButton Button, ModifierMask Modifiers, long TimestampTicks, int X, int Y);
 
 // Hook-thread to UI-thread handoff. ConcurrentQueue is allocation-free for value-type
 // enqueue/dequeue, which matches the zero-alloc contract for hook callbacks.
