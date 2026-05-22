@@ -33,6 +33,30 @@ internal sealed class SettingsModel
     public uint ZoomHotkeyMods { get; set; } = 0x0002;     // Ctrl
     public uint ZoomHotkeyVk { get; set; } = 0x32;         // 2
 
+    // --- Presentation cursor mode (enlarged high-contrast cursor + click ripple) ---
+    // Runtime on/off is NOT persisted: the mode always starts off and is toggled by hotkey.
+    // Only appearance and the hotkey binding persist.
+
+    // Presentation toggle hotkey. Default Alt+F6 (VK_F6 = 0x75).
+    public uint PresentationHotkeyMods { get; set; } = 0x0001; // Alt
+    public uint PresentationHotkeyVk { get; set; } = 0x75;     // F6
+
+    // Big cursor: a filled disk with a small transparent centre hole and a contrast border.
+    public double BigCursorSize { get; set; } = 64.0;          // outer diameter, dip
+    public double BigCursorHoleSize { get; set; } = 16.0;      // centre hole diameter, dip
+    public double BigCursorBorderThickness { get; set; } = 3.0;// dip
+    public string BigCursorColor { get; set; } = "#FFC400";    // fill, RRGGBB
+    public string BigCursorBorderColor { get; set; } = "#FFFFFF"; // contrast border, RRGGBB
+    public double BigCursorOpacity { get; set; } = 0.85;       // 0..1
+
+    // Click ripple: expanding ring per click, distinct colour per button.
+    public bool ClickRippleEnabled { get; set; } = true;
+    public string LeftClickColor { get; set; } = "#FFE000";    // yellow
+    public string MiddleClickColor { get; set; } = "#00E676";  // green
+    public string RightClickColor { get; set; } = "#2979FF";   // blue
+    public double RippleMaxRadius { get; set; } = 48.0;        // dip
+    public int RippleDurationMs { get; set; } = 420;
+
     // UI language. "zh" or "en". Default "zh" since the primary user is Chinese-speaking.
     public string Language { get; set; } = "zh";
 
@@ -54,6 +78,20 @@ internal sealed class SettingsModel
         ToggleHotkeyVk = ToggleHotkeyVk,
         ZoomHotkeyMods = ZoomHotkeyMods,
         ZoomHotkeyVk = ZoomHotkeyVk,
+        PresentationHotkeyMods = PresentationHotkeyMods,
+        PresentationHotkeyVk = PresentationHotkeyVk,
+        BigCursorSize = BigCursorSize,
+        BigCursorHoleSize = BigCursorHoleSize,
+        BigCursorBorderThickness = BigCursorBorderThickness,
+        BigCursorColor = BigCursorColor,
+        BigCursorBorderColor = BigCursorBorderColor,
+        BigCursorOpacity = BigCursorOpacity,
+        ClickRippleEnabled = ClickRippleEnabled,
+        LeftClickColor = LeftClickColor,
+        MiddleClickColor = MiddleClickColor,
+        RightClickColor = RightClickColor,
+        RippleMaxRadius = RippleMaxRadius,
+        RippleDurationMs = RippleDurationMs,
         Language = Language
     };
 }
