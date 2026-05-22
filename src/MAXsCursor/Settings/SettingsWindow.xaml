@@ -33,245 +33,256 @@
                     DockPanel.Dock="Right" Click="Ok_Click" IsDefault="True"/>
         </DockPanel>
 
-        <!-- Everything else scrolls when it outgrows the window -->
+        <!-- Everything else scrolls when it outgrows the window. Each section is a
+             collapsible Expander, collapsed by default to keep the window compact. -->
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                       Padding="20,10,20,10">
             <StackPanel>
-                <TextBlock x:Name="SectionRingText"
-                           FontWeight="Bold" Margin="0,0,0,8" Opacity="0.85"/>
+                <Expander IsExpanded="False" Margin="0,0,0,6">
+                    <Expander.Header>
+                        <TextBlock x:Name="SectionRingText" FontWeight="Bold" Opacity="0.85"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,0">
+                        <StackPanel Margin="0,0,0,12">
+                            <DockPanel>
+                                <TextBlock x:Name="RadiusText" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="RadiusLabel" HorizontalAlignment="Right"
+                                           Opacity="0.7" DockPanel.Dock="Right"/>
+                            </DockPanel>
+                            <Slider x:Name="RadiusSlider" Minimum="4" Maximum="80" Value="22"
+                                    SmallChange="1" LargeChange="4" Margin="0,4,0,0"/>
+                        </StackPanel>
 
-                <StackPanel Margin="0,0,0,12">
-                    <DockPanel>
-                        <TextBlock x:Name="RadiusText" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="RadiusLabel" HorizontalAlignment="Right"
-                                   Opacity="0.7" DockPanel.Dock="Right"/>
-                    </DockPanel>
-                    <Slider x:Name="RadiusSlider" Minimum="4" Maximum="80" Value="22"
-                            SmallChange="1" LargeChange="4" Margin="0,4,0,0"/>
-                </StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <DockPanel>
+                                <TextBlock x:Name="ThicknessText" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="ThicknessLabel" HorizontalAlignment="Right"
+                                           Opacity="0.7" DockPanel.Dock="Right"/>
+                            </DockPanel>
+                            <Slider x:Name="ThicknessSlider" Minimum="0.5" Maximum="12" Value="3"
+                                    SmallChange="0.5" LargeChange="1" Margin="0,4,0,0"/>
+                        </StackPanel>
 
-                <StackPanel Margin="0,0,0,12">
-                    <DockPanel>
-                        <TextBlock x:Name="ThicknessText" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="ThicknessLabel" HorizontalAlignment="Right"
-                                   Opacity="0.7" DockPanel.Dock="Right"/>
-                    </DockPanel>
-                    <Slider x:Name="ThicknessSlider" Minimum="0.5" Maximum="12" Value="3"
-                            SmallChange="0.5" LargeChange="1" Margin="0,4,0,0"/>
-                </StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <DockPanel>
+                                <TextBlock x:Name="OpacityText" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="OpacityLabel" HorizontalAlignment="Right"
+                                           Opacity="0.7" DockPanel.Dock="Right"/>
+                            </DockPanel>
+                            <Slider x:Name="OpacitySlider" Minimum="0" Maximum="1" Value="1"
+                                    SmallChange="0.05" LargeChange="0.1" Margin="0,4,0,0"/>
+                        </StackPanel>
 
-                <StackPanel Margin="0,0,0,12">
-                    <DockPanel>
-                        <TextBlock x:Name="OpacityText" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="OpacityLabel" HorizontalAlignment="Right"
-                                   Opacity="0.7" DockPanel.Dock="Right"/>
-                    </DockPanel>
-                    <Slider x:Name="OpacitySlider" Minimum="0" Maximum="1" Value="1"
-                            SmallChange="0.05" LargeChange="0.1" Margin="0,4,0,0"/>
-                </StackPanel>
-
-                <StackPanel Margin="0,0,0,16">
-                    <DockPanel>
-                        <TextBlock x:Name="ColorText" FontWeight="SemiBold"/>
-                        <Border x:Name="ColorSwatch" Width="90" Height="20"
-                                BorderThickness="1"
-                                CornerRadius="3"
-                                HorizontalAlignment="Right"
-                                DockPanel.Dock="Right"
-                                Background="#FFFF4060">
-                            <Border.BorderBrush>
-                                <SolidColorBrush Color="{DynamicResource TextFillColorPrimary}" Opacity="0.4"/>
-                            </Border.BorderBrush>
-                        </Border>
-                    </DockPanel>
-                    <Slider x:Name="HueSlider" Minimum="0" Maximum="360" Value="0"
-                            SmallChange="1" LargeChange="15" Margin="0,8,0,4" Height="24"
-                            IsMoveToPointEnabled="True">
-                        <Slider.Template>
-                            <ControlTemplate TargetType="{x:Type Slider}">
-                                <Grid>
-                                    <Border CornerRadius="4" Height="14" VerticalAlignment="Center" Margin="7,0">
-                                        <Border.Background>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                                <GradientStop Offset="0.00" Color="#FF0000"/>
-                                                <GradientStop Offset="0.17" Color="#FFFF00"/>
-                                                <GradientStop Offset="0.33" Color="#00FF00"/>
-                                                <GradientStop Offset="0.50" Color="#00FFFF"/>
-                                                <GradientStop Offset="0.67" Color="#0000FF"/>
-                                                <GradientStop Offset="0.83" Color="#FF00FF"/>
-                                                <GradientStop Offset="1.00" Color="#FF0000"/>
-                                            </LinearGradientBrush>
-                                        </Border.Background>
-                                    </Border>
-                                    <Track x:Name="PART_Track">
-                                        <Track.DecreaseRepeatButton>
-                                            <RepeatButton Focusable="False" IsTabStop="False">
-                                                <RepeatButton.Template>
-                                                    <ControlTemplate TargetType="{x:Type RepeatButton}">
-                                                        <Border Background="Transparent"/>
-                                                    </ControlTemplate>
-                                                </RepeatButton.Template>
-                                            </RepeatButton>
-                                        </Track.DecreaseRepeatButton>
-                                        <Track.IncreaseRepeatButton>
-                                            <RepeatButton Focusable="False" IsTabStop="False">
-                                                <RepeatButton.Template>
-                                                    <ControlTemplate TargetType="{x:Type RepeatButton}">
-                                                        <Border Background="Transparent"/>
-                                                    </ControlTemplate>
-                                                </RepeatButton.Template>
-                                            </RepeatButton>
-                                        </Track.IncreaseRepeatButton>
-                                        <Track.Thumb>
-                                            <Thumb Width="14" Height="22">
-                                                <Thumb.Template>
-                                                    <ControlTemplate TargetType="{x:Type Thumb}">
-                                                        <Border Background="White" BorderBrush="#333333"
-                                                                BorderThickness="1" CornerRadius="3"/>
-                                                    </ControlTemplate>
-                                                </Thumb.Template>
-                                            </Thumb>
-                                        </Track.Thumb>
-                                    </Track>
-                                </Grid>
-                            </ControlTemplate>
-                        </Slider.Template>
-                    </Slider>
-                    <DockPanel>
-                        <TextBlock x:Name="SaturationText" Opacity="0.7" FontSize="12"/>
-                        <TextBlock x:Name="SaturationLabel" HorizontalAlignment="Right"
-                                   Opacity="0.7" FontSize="12" DockPanel.Dock="Right"/>
-                    </DockPanel>
-                    <Slider x:Name="SaturationSlider" Minimum="0" Maximum="1" Value="1"
-                            SmallChange="0.05" LargeChange="0.2" Margin="0,2,0,0"/>
-                    <DockPanel Margin="0,6,0,0">
-                        <TextBlock x:Name="LightnessText" Opacity="0.7" FontSize="12"/>
-                        <TextBlock x:Name="LightnessLabel" HorizontalAlignment="Right"
-                                   Opacity="0.7" FontSize="12" DockPanel.Dock="Right"/>
-                    </DockPanel>
-                    <Slider x:Name="LightnessSlider" Minimum="0.1" Maximum="0.9" Value="0.5"
-                            SmallChange="0.05" LargeChange="0.1" Margin="0,2,0,0"/>
-                </StackPanel>
-
-                <TextBlock x:Name="SectionHudText"
-                           FontWeight="Bold" Margin="0,0,0,8" Opacity="0.85"/>
-
-                <StackPanel Margin="0,0,0,12">
-                    <CheckBox x:Name="HudEnabledCheck" Margin="0,0,0,6"/>
-                    <CheckBox x:Name="MouseButtonsCheck" Margin="0,0,0,10"/>
-                    <DockPanel>
-                        <TextBlock x:Name="HudFontSizeText" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="HudFontSizeLabel" HorizontalAlignment="Right"
-                                   Opacity="0.7" DockPanel.Dock="Right"/>
-                    </DockPanel>
-                    <Slider x:Name="HudFontSizeSlider" Minimum="14" Maximum="56" Value="20"
-                            SmallChange="1" LargeChange="4" Margin="0,4,0,10"/>
-                    <StackPanel Orientation="Horizontal">
-                        <Button x:Name="AdjustPositionButton" Padding="12,4"
-                                Click="AdjustPosition_Click"/>
-                        <TextBlock x:Name="PositionStatusLabel" VerticalAlignment="Center"
-                                   Margin="10,0,0,0" Opacity="0.7" FontSize="12"/>
+                        <StackPanel Margin="0,0,0,4">
+                            <DockPanel>
+                                <TextBlock x:Name="ColorText" FontWeight="SemiBold"/>
+                                <Border x:Name="ColorSwatch" Width="90" Height="20"
+                                        BorderThickness="1"
+                                        CornerRadius="3"
+                                        HorizontalAlignment="Right"
+                                        DockPanel.Dock="Right"
+                                        Background="#FFFF4060">
+                                    <Border.BorderBrush>
+                                        <SolidColorBrush Color="{DynamicResource TextFillColorPrimary}" Opacity="0.4"/>
+                                    </Border.BorderBrush>
+                                </Border>
+                            </DockPanel>
+                            <Slider x:Name="HueSlider" Minimum="0" Maximum="360" Value="0"
+                                    SmallChange="1" LargeChange="15" Margin="0,8,0,4" Height="24"
+                                    IsMoveToPointEnabled="True">
+                                <Slider.Template>
+                                    <ControlTemplate TargetType="{x:Type Slider}">
+                                        <Grid>
+                                            <Border CornerRadius="4" Height="14" VerticalAlignment="Center" Margin="7,0">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                        <GradientStop Offset="0.00" Color="#FF0000"/>
+                                                        <GradientStop Offset="0.17" Color="#FFFF00"/>
+                                                        <GradientStop Offset="0.33" Color="#00FF00"/>
+                                                        <GradientStop Offset="0.50" Color="#00FFFF"/>
+                                                        <GradientStop Offset="0.67" Color="#0000FF"/>
+                                                        <GradientStop Offset="0.83" Color="#FF00FF"/>
+                                                        <GradientStop Offset="1.00" Color="#FF0000"/>
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                            </Border>
+                                            <Track x:Name="PART_Track">
+                                                <Track.DecreaseRepeatButton>
+                                                    <RepeatButton Focusable="False" IsTabStop="False">
+                                                        <RepeatButton.Template>
+                                                            <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                                                <Border Background="Transparent"/>
+                                                            </ControlTemplate>
+                                                        </RepeatButton.Template>
+                                                    </RepeatButton>
+                                                </Track.DecreaseRepeatButton>
+                                                <Track.IncreaseRepeatButton>
+                                                    <RepeatButton Focusable="False" IsTabStop="False">
+                                                        <RepeatButton.Template>
+                                                            <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                                                <Border Background="Transparent"/>
+                                                            </ControlTemplate>
+                                                        </RepeatButton.Template>
+                                                    </RepeatButton>
+                                                </Track.IncreaseRepeatButton>
+                                                <Track.Thumb>
+                                                    <Thumb Width="14" Height="22">
+                                                        <Thumb.Template>
+                                                            <ControlTemplate TargetType="{x:Type Thumb}">
+                                                                <Border Background="White" BorderBrush="#333333"
+                                                                        BorderThickness="1" CornerRadius="3"/>
+                                                            </ControlTemplate>
+                                                        </Thumb.Template>
+                                                    </Thumb>
+                                                </Track.Thumb>
+                                            </Track>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Slider.Template>
+                            </Slider>
+                            <DockPanel>
+                                <TextBlock x:Name="SaturationText" Opacity="0.7" FontSize="12"/>
+                                <TextBlock x:Name="SaturationLabel" HorizontalAlignment="Right"
+                                           Opacity="0.7" FontSize="12" DockPanel.Dock="Right"/>
+                            </DockPanel>
+                            <Slider x:Name="SaturationSlider" Minimum="0" Maximum="1" Value="1"
+                                    SmallChange="0.05" LargeChange="0.2" Margin="0,2,0,0"/>
+                            <DockPanel Margin="0,6,0,0">
+                                <TextBlock x:Name="LightnessText" Opacity="0.7" FontSize="12"/>
+                                <TextBlock x:Name="LightnessLabel" HorizontalAlignment="Right"
+                                           Opacity="0.7" FontSize="12" DockPanel.Dock="Right"/>
+                            </DockPanel>
+                            <Slider x:Name="LightnessSlider" Minimum="0.1" Maximum="0.9" Value="0.5"
+                                    SmallChange="0.05" LargeChange="0.1" Margin="0,2,0,0"/>
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </Expander>
 
-                <TextBlock x:Name="SectionPresentationText"
-                           FontWeight="Bold" Margin="0,0,0,8" Opacity="0.85"/>
-
-                <StackPanel Margin="0,0,0,16">
-                    <CheckBox x:Name="RippleEnabledCheck" Margin="0,0,0,10"/>
-
-                    <DockPanel Margin="0,0,0,8">
-                        <TextBlock x:Name="RippleLeftColorText" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <Border x:Name="RippleLeftSwatch" Width="60" Height="18" BorderThickness="1"
-                                CornerRadius="3" Margin="8,0,8,0" DockPanel.Dock="Right" Background="#FFFFE000">
-                            <Border.BorderBrush>
-                                <SolidColorBrush Color="{DynamicResource TextFillColorPrimary}" Opacity="0.4"/>
-                            </Border.BorderBrush>
-                        </Border>
-                        <Slider x:Name="RippleLeftHueSlider" Minimum="0" Maximum="360" Value="52"
-                                SmallChange="1" LargeChange="15"/>
-                    </DockPanel>
-
-                    <DockPanel Margin="0,0,0,8">
-                        <TextBlock x:Name="RippleMiddleColorText" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <Border x:Name="RippleMiddleSwatch" Width="60" Height="18" BorderThickness="1"
-                                CornerRadius="3" Margin="8,0,8,0" DockPanel.Dock="Right" Background="#FF00E676">
-                            <Border.BorderBrush>
-                                <SolidColorBrush Color="{DynamicResource TextFillColorPrimary}" Opacity="0.4"/>
-                            </Border.BorderBrush>
-                        </Border>
-                        <Slider x:Name="RippleMiddleHueSlider" Minimum="0" Maximum="360" Value="151"
-                                SmallChange="1" LargeChange="15"/>
-                    </DockPanel>
-
-                    <DockPanel Margin="0,0,0,12">
-                        <TextBlock x:Name="RippleRightColorText" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <Border x:Name="RippleRightSwatch" Width="60" Height="18" BorderThickness="1"
-                                CornerRadius="3" Margin="8,0,8,0" DockPanel.Dock="Right" Background="#FF2979FF">
-                            <Border.BorderBrush>
-                                <SolidColorBrush Color="{DynamicResource TextFillColorPrimary}" Opacity="0.4"/>
-                            </Border.BorderBrush>
-                        </Border>
-                        <Slider x:Name="RippleRightHueSlider" Minimum="0" Maximum="360" Value="217"
-                                SmallChange="1" LargeChange="15"/>
-                    </DockPanel>
-
-                    <StackPanel Margin="0,0,0,10">
+                <Expander IsExpanded="False" Margin="0,0,0,6">
+                    <Expander.Header>
+                        <TextBlock x:Name="SectionHudText" FontWeight="Bold" Opacity="0.85"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,0">
+                        <CheckBox x:Name="HudEnabledCheck" Margin="0,0,0,6"/>
+                        <CheckBox x:Name="MouseButtonsCheck" Margin="0,0,0,10"/>
                         <DockPanel>
-                            <TextBlock x:Name="RippleSizeText" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="RippleSizeLabel" HorizontalAlignment="Right"
+                            <TextBlock x:Name="HudFontSizeText" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="HudFontSizeLabel" HorizontalAlignment="Right"
                                        Opacity="0.7" DockPanel.Dock="Right"/>
                         </DockPanel>
-                        <Slider x:Name="RippleSizeSlider" Minimum="16" Maximum="160" Value="48"
-                                SmallChange="2" LargeChange="8" Margin="0,4,0,0"/>
+                        <Slider x:Name="HudFontSizeSlider" Minimum="14" Maximum="56" Value="20"
+                                SmallChange="1" LargeChange="4" Margin="0,4,0,10"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="AdjustPositionButton" Padding="12,4"
+                                    Click="AdjustPosition_Click"/>
+                            <TextBlock x:Name="PositionStatusLabel" VerticalAlignment="Center"
+                                       Margin="10,0,0,0" Opacity="0.7" FontSize="12"/>
+                        </StackPanel>
                     </StackPanel>
+                </Expander>
 
-                    <StackPanel Margin="0,0,0,4">
-                        <DockPanel>
-                            <TextBlock x:Name="RippleDurationText" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="RippleDurationLabel" HorizontalAlignment="Right"
-                                       Opacity="0.7" DockPanel.Dock="Right"/>
+                <Expander IsExpanded="False" Margin="0,0,0,6">
+                    <Expander.Header>
+                        <TextBlock x:Name="SectionPresentationText" FontWeight="Bold" Opacity="0.85"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,0">
+                        <CheckBox x:Name="RippleEnabledCheck" Margin="0,0,0,10"/>
+
+                        <DockPanel Margin="0,0,0,8">
+                            <TextBlock x:Name="RippleLeftColorText" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            <Border x:Name="RippleLeftSwatch" Width="60" Height="18" BorderThickness="1"
+                                    CornerRadius="3" Margin="8,0,8,0" DockPanel.Dock="Right" Background="#FFFFE000">
+                                <Border.BorderBrush>
+                                    <SolidColorBrush Color="{DynamicResource TextFillColorPrimary}" Opacity="0.4"/>
+                                </Border.BorderBrush>
+                            </Border>
+                            <Slider x:Name="RippleLeftHueSlider" Minimum="0" Maximum="360" Value="52"
+                                    SmallChange="1" LargeChange="15"/>
                         </DockPanel>
-                        <Slider x:Name="RippleDurationSlider" Minimum="150" Maximum="900" Value="420"
-                                SmallChange="10" LargeChange="50" Margin="0,4,0,0"/>
+
+                        <DockPanel Margin="0,0,0,8">
+                            <TextBlock x:Name="RippleMiddleColorText" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            <Border x:Name="RippleMiddleSwatch" Width="60" Height="18" BorderThickness="1"
+                                    CornerRadius="3" Margin="8,0,8,0" DockPanel.Dock="Right" Background="#FF00E676">
+                                <Border.BorderBrush>
+                                    <SolidColorBrush Color="{DynamicResource TextFillColorPrimary}" Opacity="0.4"/>
+                                </Border.BorderBrush>
+                            </Border>
+                            <Slider x:Name="RippleMiddleHueSlider" Minimum="0" Maximum="360" Value="151"
+                                    SmallChange="1" LargeChange="15"/>
+                        </DockPanel>
+
+                        <DockPanel Margin="0,0,0,12">
+                            <TextBlock x:Name="RippleRightColorText" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            <Border x:Name="RippleRightSwatch" Width="60" Height="18" BorderThickness="1"
+                                    CornerRadius="3" Margin="8,0,8,0" DockPanel.Dock="Right" Background="#FF2979FF">
+                                <Border.BorderBrush>
+                                    <SolidColorBrush Color="{DynamicResource TextFillColorPrimary}" Opacity="0.4"/>
+                                </Border.BorderBrush>
+                            </Border>
+                            <Slider x:Name="RippleRightHueSlider" Minimum="0" Maximum="360" Value="217"
+                                    SmallChange="1" LargeChange="15"/>
+                        </DockPanel>
+
+                        <StackPanel Margin="0,0,0,10">
+                            <DockPanel>
+                                <TextBlock x:Name="RippleSizeText" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="RippleSizeLabel" HorizontalAlignment="Right"
+                                           Opacity="0.7" DockPanel.Dock="Right"/>
+                            </DockPanel>
+                            <Slider x:Name="RippleSizeSlider" Minimum="16" Maximum="160" Value="48"
+                                    SmallChange="2" LargeChange="8" Margin="0,4,0,0"/>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,4">
+                            <DockPanel>
+                                <TextBlock x:Name="RippleDurationText" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="RippleDurationLabel" HorizontalAlignment="Right"
+                                           Opacity="0.7" DockPanel.Dock="Right"/>
+                            </DockPanel>
+                            <Slider x:Name="RippleDurationSlider" Minimum="150" Maximum="900" Value="420"
+                                    SmallChange="10" LargeChange="50" Margin="0,4,0,0"/>
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </Expander>
 
-                <TextBlock x:Name="SectionShortcutsText"
-                           FontWeight="Bold" Margin="0,0,0,8" Opacity="0.85"/>
+                <Expander IsExpanded="False" Margin="0,0,0,6">
+                    <Expander.Header>
+                        <TextBlock x:Name="SectionShortcutsText" FontWeight="Bold" Opacity="0.85"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,0">
+                        <DockPanel Margin="0,0,0,4">
+                            <StackPanel DockPanel.Dock="Left">
+                                <TextBlock x:Name="ShortcutToggleLabelText" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="ShortcutToggleHintText" Opacity="0.7" FontSize="12"/>
+                            </StackPanel>
+                            <Button x:Name="ToggleHotkeyButton" MinWidth="120" Height="32" Padding="12,0"
+                                    HorizontalAlignment="Right"
+                                    Click="BeginCaptureToggle_Click"/>
+                        </DockPanel>
+                        <DockPanel Margin="0,10,0,0">
+                            <StackPanel DockPanel.Dock="Left">
+                                <TextBlock x:Name="ShortcutZoomLabelText" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="ShortcutZoomHintText" Opacity="0.7" FontSize="12"/>
+                            </StackPanel>
+                            <Button x:Name="ZoomHotkeyButton" MinWidth="120" Height="32" Padding="12,0"
+                                    HorizontalAlignment="Right"
+                                    Click="BeginCaptureZoom_Click"/>
+                        </DockPanel>
+                        <DockPanel Margin="0,10,0,0">
+                            <StackPanel DockPanel.Dock="Left">
+                                <TextBlock x:Name="ShortcutPresentationLabelText" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="ShortcutPresentationHintText" Opacity="0.7" FontSize="12"/>
+                            </StackPanel>
+                            <Button x:Name="PresentationHotkeyButton" MinWidth="120" Height="32" Padding="12,0"
+                                    HorizontalAlignment="Right"
+                                    Click="BeginCapturePresentation_Click"/>
+                        </DockPanel>
+                    </StackPanel>
+                </Expander>
 
-                <StackPanel Margin="0,0,0,12">
-                    <DockPanel Margin="0,0,0,4">
-                        <StackPanel DockPanel.Dock="Left">
-                            <TextBlock x:Name="ShortcutToggleLabelText" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="ShortcutToggleHintText" Opacity="0.7" FontSize="12"/>
-                        </StackPanel>
-                        <Button x:Name="ToggleHotkeyButton" MinWidth="120" Height="32" Padding="12,0"
-                                HorizontalAlignment="Right"
-                                Click="BeginCaptureToggle_Click"/>
-                    </DockPanel>
-                    <DockPanel Margin="0,10,0,0">
-                        <StackPanel DockPanel.Dock="Left">
-                            <TextBlock x:Name="ShortcutZoomLabelText" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="ShortcutZoomHintText" Opacity="0.7" FontSize="12"/>
-                        </StackPanel>
-                        <Button x:Name="ZoomHotkeyButton" MinWidth="120" Height="32" Padding="12,0"
-                                HorizontalAlignment="Right"
-                                Click="BeginCaptureZoom_Click"/>
-                    </DockPanel>
-                    <DockPanel Margin="0,10,0,0">
-                        <StackPanel DockPanel.Dock="Left">
-                            <TextBlock x:Name="ShortcutPresentationLabelText" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="ShortcutPresentationHintText" Opacity="0.7" FontSize="12"/>
-                        </StackPanel>
-                        <Button x:Name="PresentationHotkeyButton" MinWidth="120" Height="32" Padding="12,0"
-                                HorizontalAlignment="Right"
-                                Click="BeginCapturePresentation_Click"/>
-                    </DockPanel>
-                </StackPanel>
-
-                <!-- How-to-use: collapsed by default, expand to read. Scrolls with the rest of the content. -->
-                <Expander x:Name="HelpExpander" IsExpanded="False" Margin="0,4,0,0">
+                <!-- How-to-use: collapsed by default, expand to read. -->
+                <Expander x:Name="HelpExpander" IsExpanded="False" Margin="0,0,0,4">
                     <Expander.Header>
                         <TextBlock x:Name="HelpHeaderText" FontWeight="Bold" Opacity="0.85"/>
                     </Expander.Header>
