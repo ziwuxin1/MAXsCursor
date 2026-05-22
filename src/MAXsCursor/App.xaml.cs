@@ -24,7 +24,6 @@ public partial class App : Application
     private ClickRippleController? _ripple;
     private SettingsModel _settings = SettingsModel.Defaults();
     private bool _enabled = true;
-    private bool _presentationOn;
 
     private int? _toggleHotkeyId;
     private int? _zoomHotkeyId;
@@ -141,8 +140,10 @@ public partial class App : Application
         var pushed = false;
         while (_bus.TryDequeueMouseButton(out var btn))
         {
-            // Presentation ripple is independent of the HUD's ShowMouseButtons toggle.
-            if (_presentationOn && _enabled)
+            // Ripple is independent of the HUD's ShowMouseButtons toggle. The ripple
+            // controller itself gates on ClickRippleEnabled, so only the master overlay
+            // toggle needs checking here.
+            if (_enabled)
             {
                 _ripple?.Spawn(btn.Button, btn.X, btn.Y);
             }
@@ -262,7 +263,7 @@ public partial class App : Application
         if (_zoomHotkeyId is null) Log($"WARN: zoom hotkey registration failed: {_settings.ZoomHotkeyMods:X}/{_settings.ZoomHotkeyVk:X}");
 
         _presentationHotkeyId = _hotkey.Register(_settings.PresentationHotkeyMods, _settings.PresentationHotkeyVk,
-            () => { if (!_hotkeyCaptureActive) TogglePresentation(); });
+            () => { if (!_hotkeyCaptureActive) ToggleClickRipple(); });
         if (_presentationHotkeyId is null) Log($"WARN: presentation hotkey registration failed: {_settings.PresentationHotkeyMods:X}/{_settings.PresentationHotkeyVk:X}");
     }
 
@@ -270,12 +271,15 @@ public partial class App : Application
     // registered global hotkey does not also fire and surprise the user.
     public void SetHotkeyCapture(bool active) => _hotkeyCaptureActive = active;
 
-    private void TogglePresentation()
+    // Alt+F6 toggles the same ClickRippleEnabled flag the settings checkbox controls,
+    // so there is a single source of truth. The change persists on app exit.
+    private void ToggleClickRipple()
     {
         Dispatcher.Invoke(() =>
         {
-            _presentationOn = !_presentationOn;
-            if (!_presentationOn) _ripple?.Clear();
+            _settings.ClickRippleEnabled = !_settings.ClickRippleEnabled;
+            ApplyRippleSettings();
+            if (!_settings.ClickRippleEnabled) _ripple?.Clear();
         });
     }
 

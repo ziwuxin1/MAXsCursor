@@ -103,7 +103,7 @@ internal static class Strings
 • Ctrl+S = 保存为 PNG；Ctrl+C = 复制到剪贴板；Esc = 退出。
 
 【点击水波纹】
-• 默认快捷键 Alt+F6（可在 ""快捷键"" 区重新指定），按一下开启，再按关闭。
+• 勾选 ""启用水波纹"" 即可开启；快捷键 Alt+F6 是同一个开关，按一下切换（快捷键可改）。
 • 开启后，左键 / 中键 / 右键点击时会从鼠标处冒出不同颜色的水波纹，方便观众看清点了哪里。
 • 颜色 / 大小 / 时长在 ""点击水波纹"" 区调整。
 
@@ -133,7 +133,7 @@ Zoom + annotate
 • Ctrl+S = save as PNG, Ctrl+C = copy to clipboard, Esc = exit.
 
 Click ripple
-• Alt+F6 by default (rebindable in Shortcuts). Press once to enable, again to disable.
+• Tick ""Enable ripple"" to turn it on. Alt+F6 is the same switch, press to toggle (rebindable).
 • When on, left / middle / right clicks emit a coloured ripple from the pointer so viewers see exactly where you clicked.
 • Color / size / duration tune in the Click ripple section.
 
