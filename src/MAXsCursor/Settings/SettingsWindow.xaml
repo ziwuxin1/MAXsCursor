@@ -174,6 +174,129 @@
                     </StackPanel>
                 </StackPanel>
 
+                <TextBlock x:Name="SectionPresentationText"
+                           FontWeight="Bold" Margin="0,0,0,8" Opacity="0.85"/>
+
+                <StackPanel Margin="0,0,0,16">
+                    <StackPanel Margin="0,0,0,10">
+                        <DockPanel>
+                            <TextBlock x:Name="PresSizeText" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="PresSizeLabel" HorizontalAlignment="Right"
+                                       Opacity="0.7" DockPanel.Dock="Right"/>
+                        </DockPanel>
+                        <Slider x:Name="PresSizeSlider" Minimum="24" Maximum="120" Value="64"
+                                SmallChange="1" LargeChange="4" Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,10">
+                        <DockPanel>
+                            <TextBlock x:Name="PresHoleText" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="PresHoleLabel" HorizontalAlignment="Right"
+                                       Opacity="0.7" DockPanel.Dock="Right"/>
+                        </DockPanel>
+                        <Slider x:Name="PresHoleSlider" Minimum="0" Maximum="40" Value="16"
+                                SmallChange="1" LargeChange="4" Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,10">
+                        <DockPanel>
+                            <TextBlock x:Name="PresBorderText" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="PresBorderLabel" HorizontalAlignment="Right"
+                                       Opacity="0.7" DockPanel.Dock="Right"/>
+                        </DockPanel>
+                        <Slider x:Name="PresBorderSlider" Minimum="0" Maximum="10" Value="3"
+                                SmallChange="0.5" LargeChange="1" Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,10">
+                        <DockPanel>
+                            <TextBlock x:Name="PresOpacityText" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="PresOpacityLabel" HorizontalAlignment="Right"
+                                       Opacity="0.7" DockPanel.Dock="Right"/>
+                        </DockPanel>
+                        <Slider x:Name="PresOpacitySlider" Minimum="0.2" Maximum="1" Value="0.85"
+                                SmallChange="0.05" LargeChange="0.1" Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,12">
+                        <DockPanel>
+                            <TextBlock x:Name="PresColorText" FontWeight="SemiBold"/>
+                            <Border x:Name="PresColorSwatch" Width="90" Height="20"
+                                    BorderThickness="1" CornerRadius="3"
+                                    HorizontalAlignment="Right" DockPanel.Dock="Right"
+                                    Background="#FFFFC400">
+                                <Border.BorderBrush>
+                                    <SolidColorBrush Color="{DynamicResource TextFillColorPrimary}" Opacity="0.4"/>
+                                </Border.BorderBrush>
+                            </Border>
+                        </DockPanel>
+                        <Slider x:Name="PresHueSlider" Minimum="0" Maximum="360" Value="48"
+                                SmallChange="1" LargeChange="15" Margin="0,6,0,0"/>
+                        <Slider x:Name="PresSatSlider" Minimum="0" Maximum="1" Value="1"
+                                SmallChange="0.05" LargeChange="0.2" Margin="0,4,0,0"/>
+                        <Slider x:Name="PresLightSlider" Minimum="0.1" Maximum="0.9" Value="0.5"
+                                SmallChange="0.05" LargeChange="0.1" Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <CheckBox x:Name="RippleEnabledCheck" Margin="0,0,0,10"/>
+
+                    <DockPanel Margin="0,0,0,8">
+                        <TextBlock x:Name="RippleLeftColorText" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <Border x:Name="RippleLeftSwatch" Width="60" Height="18" BorderThickness="1"
+                                CornerRadius="3" Margin="8,0,8,0" DockPanel.Dock="Right" Background="#FFFFE000">
+                            <Border.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource TextFillColorPrimary}" Opacity="0.4"/>
+                            </Border.BorderBrush>
+                        </Border>
+                        <Slider x:Name="RippleLeftHueSlider" Minimum="0" Maximum="360" Value="52"
+                                SmallChange="1" LargeChange="15"/>
+                    </DockPanel>
+
+                    <DockPanel Margin="0,0,0,8">
+                        <TextBlock x:Name="RippleMiddleColorText" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <Border x:Name="RippleMiddleSwatch" Width="60" Height="18" BorderThickness="1"
+                                CornerRadius="3" Margin="8,0,8,0" DockPanel.Dock="Right" Background="#FF00E676">
+                            <Border.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource TextFillColorPrimary}" Opacity="0.4"/>
+                            </Border.BorderBrush>
+                        </Border>
+                        <Slider x:Name="RippleMiddleHueSlider" Minimum="0" Maximum="360" Value="151"
+                                SmallChange="1" LargeChange="15"/>
+                    </DockPanel>
+
+                    <DockPanel Margin="0,0,0,12">
+                        <TextBlock x:Name="RippleRightColorText" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <Border x:Name="RippleRightSwatch" Width="60" Height="18" BorderThickness="1"
+                                CornerRadius="3" Margin="8,0,8,0" DockPanel.Dock="Right" Background="#FF2979FF">
+                            <Border.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource TextFillColorPrimary}" Opacity="0.4"/>
+                            </Border.BorderBrush>
+                        </Border>
+                        <Slider x:Name="RippleRightHueSlider" Minimum="0" Maximum="360" Value="217"
+                                SmallChange="1" LargeChange="15"/>
+                    </DockPanel>
+
+                    <StackPanel Margin="0,0,0,10">
+                        <DockPanel>
+                            <TextBlock x:Name="RippleSizeText" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="RippleSizeLabel" HorizontalAlignment="Right"
+                                       Opacity="0.7" DockPanel.Dock="Right"/>
+                        </DockPanel>
+                        <Slider x:Name="RippleSizeSlider" Minimum="16" Maximum="160" Value="48"
+                                SmallChange="2" LargeChange="8" Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,4">
+                        <DockPanel>
+                            <TextBlock x:Name="RippleDurationText" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="RippleDurationLabel" HorizontalAlignment="Right"
+                                       Opacity="0.7" DockPanel.Dock="Right"/>
+                        </DockPanel>
+                        <Slider x:Name="RippleDurationSlider" Minimum="150" Maximum="900" Value="420"
+                                SmallChange="10" LargeChange="50" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+
                 <TextBlock x:Name="SectionShortcutsText"
                            FontWeight="Bold" Margin="0,0,0,8" Opacity="0.85"/>
 
@@ -195,6 +318,15 @@
                         <Button x:Name="ZoomHotkeyButton" MinWidth="120" Height="32" Padding="12,0"
                                 HorizontalAlignment="Right"
                                 Click="BeginCaptureZoom_Click"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0">
+                        <StackPanel DockPanel.Dock="Left">
+                            <TextBlock x:Name="ShortcutPresentationLabelText" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="ShortcutPresentationHintText" Opacity="0.7" FontSize="12"/>
+                        </StackPanel>
+                        <Button x:Name="PresentationHotkeyButton" MinWidth="120" Height="32" Padding="12,0"
+                                HorizontalAlignment="Right"
+                                Click="BeginCapturePresentation_Click"/>
                     </DockPanel>
                 </StackPanel>
 
