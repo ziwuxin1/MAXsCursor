@@ -13,6 +13,10 @@
     <RootNamespace>MAXsCursor</RootNamespace>
     <AssemblyName>MAXsCursor</AssemblyName>
     <Version>1.2.1</Version>
+    <!-- WPF needs its native DLLs (PresentationNative) on disk. Single-file in-memory
+         native loading throws DllNotFoundException at WPF init, so force native libs to
+         self-extract to a temp dir on first run. Keeps the download a single exe. -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <StartupObject>MAXsCursor.Program</StartupObject>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- WinForms suggests setting DPI via API, but WPF is the primary UI and the manifest
