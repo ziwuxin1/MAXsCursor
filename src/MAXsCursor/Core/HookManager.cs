@@ -105,6 +105,13 @@ internal sealed class HookManager : IDisposable
         RunOnHookThread(() => _cursor?.SetVisible(visible));
     }
 
+    // Marshal a topmost re-assert to the hook thread that owns the cursor window.
+    // Called periodically so other apps' topmost windows cannot bury the ring.
+    public void ReassertCursorTopmost()
+    {
+        RunOnHookThread(() => _cursor?.ReassertTopmost());
+    }
+
     private void ThreadMain()
     {
         try

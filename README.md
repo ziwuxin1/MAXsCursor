@@ -51,7 +51,7 @@ Head to the **[Releases](../../releases)** page and grab one:
 | File | Type | Size | Best for |
 |---|---|---|---|
 | `MAXsCursor.exe` | Portable (self-contained) | ~73 MB | Double-click to run. Put it on a USB stick. Zero install. |
-| `MAXsCursor-Setup-v1.2.exe` | Installer (per-user, no admin) | ~68 MB | Standard Start-menu entry + Windows **Apps & Features** uninstall. |
+| `MAXsCursor-Setup-v1.2.1.exe` | Installer (per-user, no admin) | ~68 MB | Standard Start-menu entry + Windows **Apps & Features** uninstall. |
 
 Both embed the .NET 10 runtime. Nothing extra to install.
 
@@ -91,7 +91,7 @@ Publish output lands in `src\MAXsCursor\bin\Release\net10.0-windows\win-x64\publ
 & "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe" installer\MAXsCursor.iss
 ```
 
-Output: `installer\MAXsCursor-Setup-v1.2.exe`.
+Output: `installer\MAXsCursor-Setup-v1.2.1.exe`.
 
 ## Project layout
 
@@ -156,7 +156,7 @@ Design rationale and performance budget live in [SPEC.md](SPEC.md). Working rule
 | 文件 | 类型 | 大小 | 适合 |
 |---|---|---|---|
 | `MAXsCursor.exe` | 绿色版（自包含） | 约 73 MB | 双击即用，拷到 U 盘也行，零安装 |
-| `MAXsCursor-Setup-v1.2.exe` | 安装包（per-user，无需管理员） | 约 68 MB | 标准开始菜单入口 + Windows **应用与功能** 里可卸载 |
+| `MAXsCursor-Setup-v1.2.1.exe` | 安装包（per-user，无需管理员） | 约 68 MB | 标准开始菜单入口 + Windows **应用与功能** 里可卸载 |
 
 两者都内嵌 .NET 10 运行时，不用额外装任何东西。
 
@@ -196,7 +196,7 @@ dotnet publish src\MAXsCursor\MAXsCursor.csproj -c Release -r win-x64 --self-con
 & "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe" installer\MAXsCursor.iss
 ```
 
-输出 `installer\MAXsCursor-Setup-v1.2.exe`。
+输出 `installer\MAXsCursor-Setup-v1.2.1.exe`。
 
 ## 许可
 

@@ -130,6 +130,16 @@ internal partial class HudWindow : Window
         }
     }
 
+    // Re-climb to the top of the topmost band. RepositionToCursorMonitor uses SWP_NOZORDER,
+    // so another app going topmost can bury the HUD. A periodic caller restores z-order.
+    // No SWP_SHOWWINDOW: a hidden HUD stays hidden, this only changes z-order.
+    public void ReassertTopmost()
+    {
+        if (_hwnd == nint.Zero) return;
+        const uint flags = WindowStyles.SWP_NOMOVE | WindowStyles.SWP_NOSIZE | WindowStyles.SWP_NOACTIVATE;
+        Win32.SetWindowPos(_hwnd, WindowStyles.HWND_TOPMOST, 0, 0, 0, 0, flags);
+    }
+
     public void PushKeyChip(string text) => _hud.PushKey(text);
     public void TickHud() => _hud.Tick();
     public void ClearHud() => _hud.Clear();

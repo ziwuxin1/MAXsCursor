@@ -65,6 +65,15 @@ internal sealed class NativeCursorWindow : IDisposable
         Win32.SetWindowPos(_hwnd, nint.Zero, screenPxX - half, screenPxY - half, 0, 0, flags);
     }
 
+    // Re-climb to the top of the topmost band. Movement uses SWP_NOZORDER for speed, so
+    // another app going topmost can bury us. A periodic caller restores our z-order.
+    // No SWP_SHOWWINDOW: a hidden ring stays hidden, this only changes z-order.
+    public void ReassertTopmost()
+    {
+        const uint flags = WindowStyles.SWP_NOMOVE | WindowStyles.SWP_NOSIZE | WindowStyles.SWP_NOACTIVATE;
+        Win32.SetWindowPos(_hwnd, WindowStyles.HWND_TOPMOST, 0, 0, 0, 0, flags);
+    }
+
     // Rebuild the bitmap when color/radius/thickness/opacity change. Rare event.
     public void ApplyRing(byte r, byte g, byte b, double radius, double thickness, double opacity)
     {

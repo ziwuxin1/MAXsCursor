@@ -30,6 +30,9 @@ public partial class App : Application
     private int? _presentationHotkeyId;
     private bool _hotkeyCaptureActive;
 
+    // Throttle for periodic topmost re-assert (ms since boot of last re-assert).
+    private long _lastTopmostReassertMs;
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -112,6 +115,21 @@ public partial class App : Application
         DrainMouseButtonsNow();
         _hud?.TickHud();
         _ripple?.Tick();
+
+        // Other apps' topmost or borderless-fullscreen windows can climb above our overlay
+        // over time (movement uses SWP_NOZORDER for speed and does not re-assert z-order).
+        // Re-assert topmost a few times a second so the ring and HUD stay visible. NOACTIVATE
+        // throughout means this never steals focus from the app the user is recording.
+        if (_enabled)
+        {
+            var nowMs = Environment.TickCount64;
+            if (nowMs - _lastTopmostReassertMs >= 400)
+            {
+                _lastTopmostReassertMs = nowMs;
+                _hook?.ReassertCursorTopmost();
+                if (_settings.HudEnabled) _hud?.ReassertTopmost();
+            }
+        }
     }
 
     private void DrainKeysNow()
