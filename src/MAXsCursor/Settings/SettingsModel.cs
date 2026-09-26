@@ -6,7 +6,7 @@ internal sealed class SettingsModel
 {
     // Bump when a saved value needs a one-time migration. Files written before versioning
     // have no field, which deserializes to 0.
-    public const int CurrentSchemaVersion = 1;
+    public const int CurrentSchemaVersion = 2;
     public int SchemaVersion { get; set; }
 
     // Factory defaults tuned for Junliang's recording setup: green ring at ~36 px
@@ -32,13 +32,11 @@ internal sealed class SettingsModel
     public int HudY { get; set; } = 0;
 
     // Global hotkeys. Modifiers encoded as MOD_ALT=1, MOD_CONTROL=2, MOD_SHIFT=4, MOD_WIN=8.
-    // Vk is the raw Win32 virtual-key code (e.g. VK_F5 = 0x74 = 116, VK_F7 = 0x76 = 118).
+    // Vk is the raw Win32 virtual-key code (e.g. VK_F5 = 0x74 = 116, VK_2 = 0x32 = 50).
     public uint ToggleHotkeyMods { get; set; } = 0x0001;   // Alt
     public uint ToggleHotkeyVk { get; set; } = 0x74;       // F5
-    // Alt+F7, grouped with Alt+F5 / Alt+F6. The old default Ctrl+2 was registered globally
-    // and stole Ctrl+2 from every other app (e.g. "go to tab 2" in browsers).
-    public uint ZoomHotkeyMods { get; set; } = 0x0001;     // Alt
-    public uint ZoomHotkeyVk { get; set; } = 0x76;         // F7
+    public uint ZoomHotkeyMods { get; set; } = 0x0002;     // Ctrl
+    public uint ZoomHotkeyVk { get; set; } = 0x32;         // 2
 
     // --- Click ripple mode (coloured ripple on each click) ---
     // The on/off state persists, shared by the settings checkbox and the Alt+F6 hotkey.
@@ -65,11 +63,12 @@ internal sealed class SettingsModel
     {
         if (SchemaVersion >= CurrentSchemaVersion) return false;
 
-        // v0 -> v1: move the zoom hotkey off Ctrl+2 unless the user picked something else.
-        if (SchemaVersion < 1 && ZoomHotkeyMods == 0x0002 && ZoomHotkeyVk == 0x32)
+        // v1 -> v2: v1.2.2 briefly moved the zoom default to Alt+F7 and migrated Ctrl+2 users
+        // onto it. The user wants Ctrl+2 back, so undo that migration.
+        if (SchemaVersion == 1 && ZoomHotkeyMods == 0x0001 && ZoomHotkeyVk == 0x76)
         {
-            ZoomHotkeyMods = 0x0001;
-            ZoomHotkeyVk = 0x76;
+            ZoomHotkeyMods = 0x0002;
+            ZoomHotkeyVk = 0x32;
         }
 
         SchemaVersion = CurrentSchemaVersion;

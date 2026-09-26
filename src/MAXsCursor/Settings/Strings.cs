@@ -9,7 +9,7 @@ internal static class Strings
 
     public static void SetLanguage(string lang) => _en = string.Equals(lang, "en", StringComparison.OrdinalIgnoreCase);
 
-    private const string AppName = "MAXs Cursor v 1.2.2";
+    private const string AppName = "MAXs Cursor v 1.2.3";
 
     // Settings window
     public static string AppTitle => _en ? $"{AppName} Settings" : $"{AppName} 设置";
@@ -96,7 +96,7 @@ internal static class Strings
 • 托盘图标右键菜单或双击也能切换；禁用时托盘图标变灰。
 
 【放大并标注】
-• 默认快捷键 Alt+F7（可自定义）。按下后屏幕冻结并放大 2 倍。
+• 默认快捷键 Ctrl+2（可自定义）。按下后屏幕冻结并放大 2 倍。
 • 左键拖 = 画笔；切到橡皮后左键拖 = 擦除，橡皮大小跟粗细滑块联动。
 • 滚轮 = 缩放 1×–5×；中键拖 或 空格+左键拖 = 平移视角。
 • 数字键 1–7 = 切换颜色；+ / - = 粗细；B = 画笔；E = 橡皮；C = 清除；Ctrl+Z = 撤销。
@@ -126,7 +126,7 @@ Toggle overlay
 • Tray icon right-click or double-click toggles too. Icon goes grey when disabled.
 
 Zoom + annotate
-• Alt+F7 by default (rebindable). Freezes the current monitor and zooms 2x.
+• Ctrl+2 by default (rebindable). Freezes the current monitor and zooms 2x.
 • Left drag = pen. Switch to eraser for erase; eraser size tracks the thickness slider.
 • Wheel = zoom 1x–5x. Middle drag or Space+left drag = pan.
 • 1–7 = color, + / - = thickness, B = pen, E = eraser, C = clear, Ctrl+Z = undo.
