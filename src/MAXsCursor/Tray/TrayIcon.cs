@@ -31,6 +31,9 @@ internal sealed class TrayIcon : IDisposable
         (_enabledIcon, _disabledIcon) = LoadTrayIcons();
 
         var menu = new WinForms.ContextMenuStrip();
+        // Non-clickable header so the user can see which build is running.
+        menu.Items.Add(new WinForms.ToolStripMenuItem(Strings.TrayHeader) { Enabled = false });
+        menu.Items.Add(new WinForms.ToolStripSeparator());
         _enableItem = new WinForms.ToolStripMenuItem(Strings.TrayDisable, null, (_, _) => _onToggle());
         _settingsItem = new WinForms.ToolStripMenuItem(Strings.TraySettings, null, (_, _) => _onSettings());
         _quitItem = new WinForms.ToolStripMenuItem(Strings.TrayQuit, null, (_, _) => _onQuit());
@@ -55,6 +58,11 @@ internal sealed class TrayIcon : IDisposable
         _icon.Icon = enabled ? _enabledIcon : _disabledIcon;
         _enableItem.Text = enabled ? Strings.TrayDisable : Strings.TrayEnable;
         _icon.Text = enabled ? Strings.TrayTooltipOn : Strings.TrayTooltipOff;
+    }
+
+    public void ShowWarning(string title, string text)
+    {
+        _icon.ShowBalloonTip(8000, title, text, WinForms.ToolTipIcon.Warning);
     }
 
     public void UpdateLanguage()

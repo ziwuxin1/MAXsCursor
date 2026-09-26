@@ -16,6 +16,11 @@ internal sealed class KeyboardHudLayer : StackPanel
     private const double VisibleSeconds = 2.0;
     private const double FadeSeconds = 0.6;
 
+    // Shared by every chip. Frozen so WPF can skip change tracking and share them across renders.
+    private static readonly FontFamily ChipFont = new("Segoe UI");
+    private static readonly SolidColorBrush ChipBackground = Frozen(Color.FromArgb(0xCC, 0x10, 0x10, 0x10));
+    private static readonly SolidColorBrush ChipBorder = Frozen(Color.FromArgb(0x60, 0xFF, 0xFF, 0xFF));
+
     private double _fontSize = 20.0;
 
     private readonly List<ChipEntry> _chips = new(MaxChips + 1);
@@ -91,7 +96,7 @@ internal sealed class KeyboardHudLayer : StackPanel
         var tb = new TextBlock
         {
             Text = text,
-            FontFamily = new FontFamily("Segoe UI"),
+            FontFamily = ChipFont,
             FontSize = _fontSize,
             FontWeight = FontWeights.SemiBold,
             Foreground = Brushes.White,
@@ -100,8 +105,8 @@ internal sealed class KeyboardHudLayer : StackPanel
         };
         return new Border
         {
-            Background = new SolidColorBrush(Color.FromArgb(0xCC, 0x10, 0x10, 0x10)),
-            BorderBrush = new SolidColorBrush(Color.FromArgb(0x60, 0xFF, 0xFF, 0xFF)),
+            Background = ChipBackground,
+            BorderBrush = ChipBorder,
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(6),
             Padding = new Thickness(14, 6, 14, 6),
@@ -109,5 +114,12 @@ internal sealed class KeyboardHudLayer : StackPanel
             Child = tb,
             IsHitTestVisible = false
         };
+    }
+
+    private static SolidColorBrush Frozen(Color color)
+    {
+        var brush = new SolidColorBrush(color);
+        brush.Freeze();
+        return brush;
     }
 }

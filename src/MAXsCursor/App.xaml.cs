@@ -1,4 +1,3 @@
-using System.IO;
 using MAXsCursor.Core;
 using MAXsCursor.Interop;
 using MAXsCursor.Overlay;
@@ -29,9 +28,6 @@ public partial class App : Application
     private int? _zoomHotkeyId;
     private int? _presentationHotkeyId;
     private bool _hotkeyCaptureActive;
-
-    // Throttle for periodic topmost re-assert (ms since boot of last re-assert).
-    private long _lastTopmostReassertMs;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -74,11 +70,12 @@ public partial class App : Application
         _clock = new RenderClock(OnFrameTick);
         _clock.Start();
 
-        _hotkey = new HotkeyManager();
-        RegisterConfiguredHotkeys();
-
+        // Tray first, so a hotkey conflict found during registration can be shown as a balloon.
         _tray = new TrayIcon(onToggle: ToggleEnabled, onSettings: ShowSettings, onQuit: ShutdownCleanly);
         _tray.SetEnabled(_enabled);
+
+        _hotkey = new HotkeyManager();
+        RegisterConfiguredHotkeys();
 
         AppDomain.CurrentDomain.ProcessExit += (_, _) => CleanupHooks();
     }
@@ -115,21 +112,8 @@ public partial class App : Application
         DrainMouseButtonsNow();
         _hud?.TickHud();
         _ripple?.Tick();
-
-        // Other apps' topmost or borderless-fullscreen windows can climb above our overlay
-        // over time (movement uses SWP_NOZORDER for speed and does not re-assert z-order).
-        // Re-assert topmost a few times a second so the ring and HUD stay visible. NOACTIVATE
-        // throughout means this never steals focus from the app the user is recording.
-        if (_enabled)
-        {
-            var nowMs = Environment.TickCount64;
-            if (nowMs - _lastTopmostReassertMs >= 400)
-            {
-                _lastTopmostReassertMs = nowMs;
-                _hook?.ReassertCursorTopmost();
-                if (_settings.HudEnabled) _hud?.ReassertTopmost();
-            }
-        }
+        // Topmost re-assert for the ring and HUD lives on the hook thread (HookManager), so it
+        // keeps working even if this render tick stalls.
     }
 
     private void DrainKeysNow()
@@ -272,18 +256,32 @@ public partial class App : Application
         if (_zoomHotkeyId.HasValue) { _hotkey.Unregister(_zoomHotkeyId.Value); _zoomHotkeyId = null; }
         if (_presentationHotkeyId.HasValue) { _hotkey.Unregister(_presentationHotkeyId.Value); _presentationHotkeyId = null; }
 
+        var failed = new List<string>();
+
         _toggleHotkeyId = _hotkey.Register(_settings.ToggleHotkeyMods, _settings.ToggleHotkeyVk,
             () => { if (!_hotkeyCaptureActive) ToggleEnabled(); });
-        if (_toggleHotkeyId is null) Log($"WARN: toggle hotkey registration failed: {_settings.ToggleHotkeyMods:X}/{_settings.ToggleHotkeyVk:X}");
+        if (_toggleHotkeyId is null) failed.Add(DescribeHotkey(Strings.ShortcutToggleLabel, _settings.ToggleHotkeyMods, _settings.ToggleHotkeyVk));
 
         _zoomHotkeyId = _hotkey.Register(_settings.ZoomHotkeyMods, _settings.ZoomHotkeyVk,
             () => { if (!_hotkeyCaptureActive) OpenZoomMode(); });
-        if (_zoomHotkeyId is null) Log($"WARN: zoom hotkey registration failed: {_settings.ZoomHotkeyMods:X}/{_settings.ZoomHotkeyVk:X}");
+        if (_zoomHotkeyId is null) failed.Add(DescribeHotkey(Strings.ShortcutZoomLabel, _settings.ZoomHotkeyMods, _settings.ZoomHotkeyVk));
 
         _presentationHotkeyId = _hotkey.Register(_settings.PresentationHotkeyMods, _settings.PresentationHotkeyVk,
             () => { if (!_hotkeyCaptureActive) ToggleClickRipple(); });
-        if (_presentationHotkeyId is null) Log($"WARN: presentation hotkey registration failed: {_settings.PresentationHotkeyMods:X}/{_settings.PresentationHotkeyVk:X}");
+        if (_presentationHotkeyId is null) failed.Add(DescribeHotkey(Strings.ShortcutPresentationLabel, _settings.PresentationHotkeyMods, _settings.PresentationHotkeyVk));
+
+        if (failed.Count > 0)
+        {
+            var list = string.Join(", ", failed);
+            Log($"WARN: hotkey registration failed: {list}");
+            // Another app already owns these combos, so pressing them does nothing here.
+            // Tell the user instead of failing silently.
+            _tray?.ShowWarning(Strings.HotkeyConflictTitle, Strings.HotkeyConflictBody(list));
+        }
     }
+
+    private static string DescribeHotkey(string name, uint mods, uint vk)
+        => $"{name} ({KeyTranslator.FormatHotkey(mods, vk)})";
 
     // Called by SettingsWindow while it is actively capturing a new hotkey, so the currently
     // registered global hotkey does not also fire and surprise the user.
@@ -347,13 +345,5 @@ public partial class App : Application
         base.OnExit(e);
     }
 
-    private static void Log(string message)
-    {
-        try
-        {
-            var path = Path.Combine(Path.GetTempPath(), "MAXsCursor.log");
-            File.AppendAllText(path, $"[{DateTime.Now:HH:mm:ss.fff}] {message}{Environment.NewLine}");
-        }
-        catch { }
-    }
+    private static void Log(string message) => DiagLog.Write(message);
 }

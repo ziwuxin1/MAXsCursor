@@ -1,5 +1,5 @@
-using System.IO;
 using System.Threading;
+using MAXsCursor.Core;
 
 namespace MAXsCursor;
 
@@ -50,13 +50,5 @@ internal static class Program
         }
     }
 
-    private static void Log(string message)
-    {
-        try
-        {
-            var path = Path.Combine(Path.GetTempPath(), "MAXsCursor.log");
-            File.AppendAllText(path, $"[{DateTime.Now:HH:mm:ss.fff}] {message}{Environment.NewLine}");
-        }
-        catch { }
-    }
+    private static void Log(string message) => DiagLog.Write(message);
 }

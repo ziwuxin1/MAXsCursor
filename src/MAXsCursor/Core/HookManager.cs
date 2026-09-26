@@ -31,8 +31,25 @@ internal sealed class HookManager : IDisposable
     private static Action<int, int>? s_onMouseMove;
 
     // Where to post WM_APP_INPUT_WAKE for non-mouse input (keyboard). The HUD window.
+    // Also re-asserted topmost alongside the ring, since it is the HUD window.
     private static nint s_wakeHwnd;
     public static void SetWakeHwnd(nint hwnd) => s_wakeHwnd = hwnd;
+
+    // Last time (TickCount64) and position the mouse hook reported anything. Written by the
+    // hook callback, read by the watchdog on the same thread. Plain fields, no allocation.
+    private static long s_lastMouseHookMs;
+    private static int s_lastHookX;
+    private static int s_lastHookY;
+
+    // Maintenance cadence: topmost re-assert + mouse-hook watchdog.
+    private const uint MaintenanceIntervalMs = 400;
+    // The newly activated window raises itself after EVENT_SYSTEM_FOREGROUND arrives, so an
+    // immediate re-assert alone loses. Follow up a few times in quick succession (measured:
+    // worst-case time buried went from ~410ms with the periodic timer alone to under 40ms).
+    private const uint ForegroundFollowUpMs = 30;
+    private const int ForegroundFollowUpCount = 5;
+    // Cursor moved but the hook stayed silent this long: Windows has dropped the hook.
+    private const long HookStallMs = 1000;
 
     private readonly EventBus _bus;
     private readonly ConcurrentQueue<Action> _tasks = new();
@@ -44,6 +61,14 @@ internal sealed class HookManager : IDisposable
 
     // Cursor window lives on the hook thread.
     private NativeCursorWindow? _cursor;
+
+    // Hook-thread-owned timers and the foreground WinEvent hook. The delegate is a field so
+    // the GC keeps it alive while native code holds the pointer.
+    private nuint _maintenanceTimerId;
+    private nuint _followUpTimerId;
+    private int _followUpsRemaining;
+    private nint _foregroundHook;
+    private Win32.WinEventProc? _foregroundProc;
 
     public HookManager(EventBus bus)
     {
@@ -105,13 +130,6 @@ internal sealed class HookManager : IDisposable
         RunOnHookThread(() => _cursor?.SetVisible(visible));
     }
 
-    // Marshal a topmost re-assert to the hook thread that owns the cursor window.
-    // Called periodically so other apps' topmost windows cannot bury the ring.
-    public void ReassertCursorTopmost()
-    {
-        RunOnHookThread(() => _cursor?.ReassertTopmost());
-    }
-
     private void ThreadMain()
     {
         try
@@ -120,9 +138,18 @@ internal sealed class HookManager : IDisposable
             s_mouseProc = MouseHookProc;
             s_keyboardProc = KeyboardHookProc;
 
-            var hMod = Win32.GetModuleHandle(null);
-            s_mouseHook = Win32.SetWindowsHookEx(Win32.WH_MOUSE_LL, s_mouseProc, hMod, 0);
-            s_keyboardHook = Win32.SetWindowsHookEx(Win32.WH_KEYBOARD_LL, s_keyboardProc, hMod, 0);
+            InstallInputHooks();
+
+            // Other apps' topmost windows (taskbar, screenshot tools, IME popups) can climb above
+            // the overlay. Re-assert right when the foreground window changes, and periodically as
+            // a backstop. Both run here, independent of the WPF render clock.
+            _foregroundProc = OnForegroundChanged;
+            _foregroundHook = Win32.SetWinEventHook(
+                Win32.EVENT_SYSTEM_FOREGROUND, Win32.EVENT_SYSTEM_FOREGROUND, nint.Zero, _foregroundProc,
+                0, 0, Win32.WINEVENT_OUTOFCONTEXT | Win32.WINEVENT_SKIPOWNPROCESS);
+            if (_foregroundHook == nint.Zero) DiagLog.Write("WARN: SetWinEventHook(FOREGROUND) failed");
+            _maintenanceTimerId = Win32.SetTimer(nint.Zero, 0, MaintenanceIntervalMs, nint.Zero);
+            if (_maintenanceTimerId == 0) DiagLog.Write("WARN: SetTimer(maintenance) failed, topmost re-assert and hook watchdog are off");
 
             _threadId = Win32.GetCurrentThreadId();
             _ready.Set();
@@ -139,6 +166,11 @@ internal sealed class HookManager : IDisposable
                         try { task(); } catch { /* hook thread must never crash */ }
                     }
                 }
+                else if (msg.message == Win32.WM_TIMER && msg.hwnd == nint.Zero)
+                {
+                    try { OnTimer((nuint)msg.wParam); } catch { /* hook thread must never crash */ }
+                    continue;
+                }
 
                 Win32.TranslateMessage(ref msg);
                 Win32.DispatchMessage(ref msg);
@@ -147,14 +179,92 @@ internal sealed class HookManager : IDisposable
         finally
         {
             s_onMouseMove = null;
+            if (_maintenanceTimerId != 0) { Win32.KillTimer(nint.Zero, _maintenanceTimerId); _maintenanceTimerId = 0; }
+            if (_followUpTimerId != 0) { Win32.KillTimer(nint.Zero, _followUpTimerId); _followUpTimerId = 0; }
+            if (_foregroundHook != nint.Zero) { Win32.UnhookWinEvent(_foregroundHook); _foregroundHook = nint.Zero; }
             _cursor?.Dispose();
             _cursor = null;
-            if (s_mouseHook != nint.Zero) { Win32.UnhookWindowsHookEx(s_mouseHook); s_mouseHook = nint.Zero; }
-            if (s_keyboardHook != nint.Zero) { Win32.UnhookWindowsHookEx(s_keyboardHook); s_keyboardHook = nint.Zero; }
+            UninstallInputHooks();
             s_mouseProc = null;
             s_keyboardProc = null;
             s_bus = null;
         }
+    }
+
+    private static void InstallInputHooks()
+    {
+        var hMod = Win32.GetModuleHandle(null);
+        s_mouseHook = Win32.SetWindowsHookEx(Win32.WH_MOUSE_LL, s_mouseProc!, hMod, 0);
+        s_keyboardHook = Win32.SetWindowsHookEx(Win32.WH_KEYBOARD_LL, s_keyboardProc!, hMod, 0);
+        s_lastMouseHookMs = Environment.TickCount64;
+        if (Win32.GetCursorPos(out var pt)) { s_lastHookX = pt.X; s_lastHookY = pt.Y; }
+    }
+
+    private static void UninstallInputHooks()
+    {
+        // UnhookWindowsHookEx fails harmlessly if Windows already removed the hook.
+        if (s_mouseHook != nint.Zero) { Win32.UnhookWindowsHookEx(s_mouseHook); s_mouseHook = nint.Zero; }
+        if (s_keyboardHook != nint.Zero) { Win32.UnhookWindowsHookEx(s_keyboardHook); s_keyboardHook = nint.Zero; }
+    }
+
+    private void OnTimer(nuint timerId)
+    {
+        if (timerId == _maintenanceTimerId)
+        {
+            ReassertTopmost();
+            CheckMouseHookHealth();
+        }
+        else if (timerId == _followUpTimerId)
+        {
+            ReassertTopmost();
+            if (--_followUpsRemaining <= 0)
+            {
+                Win32.KillTimer(nint.Zero, _followUpTimerId);
+                _followUpTimerId = 0;
+            }
+        }
+    }
+
+    private void OnForegroundChanged(nint hook, uint eventType, nint hwnd,
+        int idObject, int idChild, uint idEventThread, uint eventTime)
+    {
+        ReassertTopmost();
+        _followUpsRemaining = ForegroundFollowUpCount;
+        // Thread timers ignore the id on creation but reuse a live one, so this also restarts it.
+        _followUpTimerId = Win32.SetTimer(nint.Zero, _followUpTimerId, ForegroundFollowUpMs, nint.Zero);
+    }
+
+    // Climb back to the top of the topmost band. NOACTIVATE: never steals focus. The HUD belongs
+    // to the UI thread, so its request is posted (ASYNCWINDOWPOS) and never blocks this thread.
+    // Neither call passes SWP_SHOWWINDOW, so a hidden ring or HUD stays hidden.
+    private void ReassertTopmost()
+    {
+        _cursor?.ReassertTopmost();
+        var hud = s_wakeHwnd;
+        if (hud != nint.Zero)
+        {
+            const uint flags = WindowStyles.SWP_NOMOVE | WindowStyles.SWP_NOSIZE
+                             | WindowStyles.SWP_NOACTIVATE | WindowStyles.SWP_ASYNCWINDOWPOS;
+            Win32.SetWindowPos(hud, WindowStyles.HWND_TOPMOST, 0, 0, 0, 0, flags);
+        }
+    }
+
+    // Windows silently removes a low-level hook whose callback once runs past
+    // LowLevelHooksTimeout, with no notification. The ring would then freeze until restart.
+    // What we can observe: the cursor is somewhere the hook never reported, and the hook has
+    // been silent for a while. Reinstalling a live hook is harmless, so a false positive
+    // (an app warping the cursor with SetCursorPos, say) costs only a log line.
+    private void CheckMouseHookHealth()
+    {
+        if (!Win32.GetCursorPos(out var pt)) return;
+        if (pt.X == s_lastHookX && pt.Y == s_lastHookY) return;
+        if (Environment.TickCount64 - s_lastMouseHookMs < HookStallMs) return;
+
+        DiagLog.Write($"mouse hook silent while cursor moved to ({pt.X},{pt.Y}), reinstalling input hooks");
+        UninstallInputHooks();
+        InstallInputHooks();
+        if (s_mouseHook == nint.Zero) DiagLog.Write("ERROR: mouse hook reinstall failed");
+        _cursor?.FollowCursor(pt.X, pt.Y);
     }
 
     // Fast path: called on hook thread. No allocations, no cross-thread marshaling,
@@ -167,6 +277,9 @@ internal sealed class HookManager : IDisposable
             unsafe
             {
                 var data = *(Win32.MSLLHOOKSTRUCT*)lParam;
+                s_lastMouseHookMs = Environment.TickCount64;
+                s_lastHookX = data.pt.X;
+                s_lastHookY = data.pt.Y;
 
                 if (msg == Win32.WM_MOUSEMOVE)
                 {

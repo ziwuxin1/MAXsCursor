@@ -22,6 +22,8 @@ internal static class WindowStyles
     public const uint SWP_NOZORDER = 0x0004;
     public const uint SWP_NOACTIVATE = 0x0010;
     public const uint SWP_SHOWWINDOW = 0x0040;
+    // Post the request to the window's owner thread instead of waiting for it.
+    public const uint SWP_ASYNCWINDOWPOS = 0x4000;
 
     public static readonly nint HWND_TOPMOST = new(-1);
 
@@ -34,5 +36,4 @@ internal static class WindowStyles
     public const uint MOD_NOREPEAT = 0x4000;
 
     public const int VK_F5 = 0x74;
-    public const int VK_2 = 0x32;
 }

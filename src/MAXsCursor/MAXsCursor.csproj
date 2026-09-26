@@ -12,7 +12,7 @@
     <ApplicationIcon>Assets\cursor.ico</ApplicationIcon>
     <RootNamespace>MAXsCursor</RootNamespace>
     <AssemblyName>MAXsCursor</AssemblyName>
-    <Version>1.2.1</Version>
+    <Version>1.2.2</Version>
     <!-- WPF needs its native DLLs (PresentationNative) on disk. Single-file in-memory
          native loading throws DllNotFoundException at WPF init, so force native libs to
          self-extract to a temp dir on first run. Keeps the download a single exe. -->

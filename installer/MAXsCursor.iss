@@ -6,7 +6,7 @@
 ; prompt needed) and registers an uninstaller under Windows "Apps & Features".
 
 #define AppName      "MAXs Cursor"
-#define AppVersion   "1.2.1"
+#define AppVersion   "1.2.2"
 #define AppPublisher "ziwuxin1"
 #define AppURL       "https://github.com/ziwuxin1/MAXsCursor"
 #define AppExeName   "MAXsCursor.exe"
@@ -20,7 +20,7 @@ AppPublisher={#AppPublisher}
 AppPublisherURL={#AppURL}
 AppSupportURL={#AppURL}/issues
 AppUpdatesURL={#AppURL}/releases
-VersionInfoVersion=1.2.1.0
+VersionInfoVersion=1.2.2.0
 
 ; Per-user install so the wizard never raises a UAC prompt.
 PrivilegesRequired=lowest
@@ -53,7 +53,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "startupicon"; Description: "Start MAXs Cursor when I sign in"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "..\MAXsCursor.exe"; DestDir: "{app}"; DestName: "{#AppExeName}"; Flags: ignoreversion
+Source: "..\MAXsCursor-v{#AppVersion}.exe"; DestDir: "{app}"; DestName: "{#AppExeName}"; Flags: ignoreversion
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 

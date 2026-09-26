@@ -305,4 +305,30 @@ internal static class Win32
         POINT* pptDst, SIZE* psize,
         nint hdcSrc, POINT* pptSrc,
         uint crKey, BLENDFUNCTION* pblend, uint dwFlags);
+
+    // Thread timers (hwnd = 0). WM_TIMER lands in the calling thread's message queue.
+    public const int WM_TIMER = 0x0113;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern nuint SetTimer(nint hWnd, nuint nIDEvent, uint uElapse, nint lpTimerFunc);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool KillTimer(nint hWnd, nuint uIDEvent);
+
+    // Out-of-context WinEvent hooks. Callbacks arrive on the installing thread while it pumps messages.
+    public const uint EVENT_SYSTEM_FOREGROUND = 0x0003;
+    public const uint WINEVENT_OUTOFCONTEXT = 0x0000;
+    public const uint WINEVENT_SKIPOWNPROCESS = 0x0002;
+
+    public delegate void WinEventProc(nint hWinEventHook, uint eventType, nint hwnd,
+        int idObject, int idChild, uint idEventThread, uint dwmsEventTime);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern nint SetWinEventHook(uint eventMin, uint eventMax, nint hmodWinEventProc,
+        WinEventProc lpfnWinEventProc, uint idProcess, uint idThread, uint dwFlags);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool UnhookWinEvent(nint hWinEventHook);
 }

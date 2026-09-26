@@ -9,7 +9,7 @@ internal static class Strings
 
     public static void SetLanguage(string lang) => _en = string.Equals(lang, "en", StringComparison.OrdinalIgnoreCase);
 
-    private const string AppName = "MAXs Cursor v 1.2.1";
+    private const string AppName = "MAXs Cursor v 1.2.2";
 
     // Settings window
     public static string AppTitle => _en ? $"{AppName} Settings" : $"{AppName} 设置";
@@ -96,7 +96,7 @@ internal static class Strings
 • 托盘图标右键菜单或双击也能切换；禁用时托盘图标变灰。
 
 【放大并标注】
-• 默认快捷键 Ctrl+2（可自定义）。按下后屏幕冻结并放大 2 倍。
+• 默认快捷键 Alt+F7（可自定义）。按下后屏幕冻结并放大 2 倍。
 • 左键拖 = 画笔；切到橡皮后左键拖 = 擦除，橡皮大小跟粗细滑块联动。
 • 滚轮 = 缩放 1×–5×；中键拖 或 空格+左键拖 = 平移视角。
 • 数字键 1–7 = 切换颜色；+ / - = 粗细；B = 画笔；E = 橡皮；C = 清除；Ctrl+Z = 撤销。
@@ -126,7 +126,7 @@ Toggle overlay
 • Tray icon right-click or double-click toggles too. Icon goes grey when disabled.
 
 Zoom + annotate
-• Ctrl+2 by default (rebindable). Freezes the current monitor and zooms 2x.
+• Alt+F7 by default (rebindable). Freezes the current monitor and zooms 2x.
 • Left drag = pen. Switch to eraser for erase; eraser size tracks the thickness slider.
 • Wheel = zoom 1x–5x. Middle drag or Space+left drag = pan.
 • 1–7 = color, + / - = thickness, B = pen, E = eraser, C = clear, Ctrl+Z = undo.
@@ -148,10 +148,17 @@ System tray
         : "拖动整个面板到希望按键显示出现的位置";
 
     // Tray
+    public static string TrayHeader => AppName;
     public static string TrayEnable => _en ? "Enable" : "启用";
     public static string TrayDisable => _en ? "Disable" : "禁用";
     public static string TraySettings => _en ? "Settings..." : "设置...";
     public static string TrayQuit => _en ? "Quit" : "退出";
     public static string TrayTooltipOn => _en ? $"{AppName} (on)" : $"{AppName} (开)";
     public static string TrayTooltipOff => _en ? $"{AppName} (off)" : $"{AppName} (关)";
+
+    // Hotkey conflict balloon
+    public static string HotkeyConflictTitle => _en ? $"{AppName}: shortcut unavailable" : $"{AppName}：快捷键不可用";
+    public static string HotkeyConflictBody(string list) => _en
+        ? $"Another app already uses: {list}. Pick a different key under Settings > Shortcuts."
+        : $"以下快捷键已被其它软件占用，按了不会生效：{list}。请在 设置 > 快捷键 里换一个。";
 }
